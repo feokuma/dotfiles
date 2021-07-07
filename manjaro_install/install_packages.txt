@@ -1,0 +1,7 @@
+neovim
+nodejs
+npm
+alacritty
+tmux
+yarn
+zsh

@@ -1,0 +1,23 @@
+- defaults:
+    link:
+      relink: true
+    shell:
+      stdin: true
+      stout: true
+
+- clean:
+    - "~"
+
+- create:
+    - ~/.config
+
+- link:
+    ~/.bashrc: shell/bashrc
+    ~/.zshrc: shell/zshrc
+    ~/.gitconfig: git/gitconfig
+    ~/.gitignore: git/gitignore
+    ~/.config/alacritty.yml: applications/alacritty.yml
+    ~/.config/Code/User/settings.json: applications/code.settings.json
+
+- shell:
+    - [git submodule update --init --recursive, Installing submodules]

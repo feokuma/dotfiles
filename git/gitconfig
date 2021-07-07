@@ -1,0 +1,10 @@
+[code]
+	editor = code
+[credencials]
+	helper = store
+[commit]
+	editor = nvim
+[core]
+	editor = nvim
+[init]
+	defaultBranch = main

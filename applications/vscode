@@ -1,0 +1,24 @@
+{
+  "editor.lineNumbers": "relative",
+  "editor.fontFamily": "'Cascadia Code', 'monospace', monospace, 'Droid Sans Fallback'",
+  "editor.fontLigatures": true,
+  "keyboard.dispatch": "keyCode",
+  "window.menuBarVisibility": "toggle",
+  "editor.minimap.enabled": false,
+  "workbench.iconTheme": "vscode-icons",
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "extensions.ignoreRecommendations": true,
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true
+  },
+  "terminal.integrated.cursorStyle": "underline",
+  "editor.tabSize": 4,
+  "editor.cursorStyle": "line",
+  "editor.insertSpaces": false,
+  "editor.wordSeparators": "/\\()\"':,.;<>~!@#$%^&*|+=[]{}`?-",
+  "editor.formatOnSave": true,
+  "vim.useSystemClipboard": true
+}
