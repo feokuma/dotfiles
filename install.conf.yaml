@@ -10,6 +10,7 @@
 
 - create:
     - ~/.config
+    - ~/.config/Code/User
 
 - link:
     ~/.bashrc: shell/bashrc

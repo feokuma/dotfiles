@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-if ["lsb_release -i | cut -f 2-" = "ManjaroLinux"] ; then
-	.manjaro_install/install.sh
-fi
-
 set -e
 
 CONFIG="install.conf.yaml"
