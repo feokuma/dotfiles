@@ -1,7 +1,9 @@
-neovim
 nodejs
 npm
+yarn
 alacritty
 tmux
-yarn
-zsh
+cool-retro-term
+docker
+docker-compose
+dotnet-sdk-bin

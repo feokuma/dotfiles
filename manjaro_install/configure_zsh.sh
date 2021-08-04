@@ -1,5 +1,7 @@
 # RUN AS ROOT!
 # Install oh-my-zsh
+
+yay -S zsh
 curl -L http://install.ohmyz.sh | sh
 
 # Add ZSH Plugins
