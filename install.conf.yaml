@@ -11,6 +11,7 @@
 - create:
     - ~/.config
     - ~/.config/Code/User
+    - ~/development
 
 - link:
     ~/.bashrc: shell/bashrc

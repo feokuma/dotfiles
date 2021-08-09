@@ -7,3 +7,4 @@ cool-retro-term
 docker
 docker-compose
 dotnet-sdk-bin
+postman-bin

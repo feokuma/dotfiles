@@ -104,6 +104,10 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-PATH="/home/feokuma/.dotnet:$PATH"
-export ASPNETCORE_ENVIRONMENT="Development"
 BROWSER=google-chrome-stable
+PATH="$HOME/.dotnet:$PATH"        
+PATH="$PATH:$(yarn global bin)"
+export BROWSER=/usr/bin/microsoft-edge-dev
+export ASPNETCORE_ENVIRONMENT="Development"
+export ASPNETCORE_Kestrel__Certificates__Default__Password="password"
+export ASPNETCORE_Kestrel__Certificates__Default__Path="$HOME/.aspnet/https/localhost.pfx" 
