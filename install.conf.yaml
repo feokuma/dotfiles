@@ -1,27 +1,29 @@
 - defaults:
-    link:
-      relink: true
-    shell:
-      stdin: true
-      stout: true
+      link:
+          relink: true
+      shell:
+          stdin: true
+          stout: true
 
 - clean:
-    - "~"
-
-- create:
-    - ~/.config
-    - ~/.config/Code/User
-    - ~/development
-
-- link:
-    ~/.bashrc: shell/bashrc
-    ~/.zshrc: shell/zshrc
-    ~/.gitconfig: git/gitconfig
-    ~/.gitignore: git/gitignore
-    ~/.config/alacritty.yml: applications/alacritty.yml
-    ~/.config/Code/User/settings.json: applications/code.settings.json
-    ~/.config/nvim/init.vim: applications/init.vim
-    ~/.tmux.conf: applications/tmux.conf
+      - "~"
 
 - shell:
-    - [git submodule update --init --recursive, Installing submodules]
+      - [git submodule update --init --recursive, Installing submodules]
+      - [./manjaro_install/install.sh, Installing manjaro applications]
+
+- create:
+      - ~/.config
+      - ~/.config/Code/User
+      - ~/development
+
+- link:
+      ~/.bashrc: shell/bashrc
+      ~/.zshrc: shell/zshrc
+      ~/.gitconfig: git/gitconfig
+      ~/.gitignore: git/gitignore
+      ~/.config/alacritty.yml: applications/alacritty.yml
+      ~/.config/Code/User/settings.json: applications/code.settings.json
+      ~/.config/nvim/init.vim: applications/init.vim
+      ~/.tmux.conf: applications/tmux.conf
+      ~/.config/kitty/kitty.conf: applications/kitty.conf

@@ -8,3 +8,4 @@ docker
 docker-compose
 dotnet-sdk-bin
 postman-bin
+kitty
