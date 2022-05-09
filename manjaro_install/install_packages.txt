@@ -1,11 +1,11 @@
+kitty
+alacritty
+wget
+tmux
 nodejs
 npm
 yarn
-alacritty
-tmux
-cool-retro-term
 docker
 docker-compose
 dotnet-sdk-bin
 postman-bin
-kitty
