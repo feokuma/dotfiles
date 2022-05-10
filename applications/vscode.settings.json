@@ -1,0 +1,33 @@
+{
+    "editor.minimap.enabled": false,
+    "editor.fontLigatures": true,
+    "editor.fontFamily": "'CaskaydiaCove Nerd Font', 'Courier New', monospace",
+    "yaml.schemas": {
+        "file:///toc.schema.json": "/toc\\.yml/i"
+    },
+    "window.menuBarVisibility": "toggle",
+    "terminal.integrated.fontFamily": "\"CaskaydiaCove Nerd Font\"",
+    "vim.enableNeovim": true,
+    "keyboard.dispatch": "keyCode",
+    "terminal.integrated.fontSize": 13,
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    },
+    "workbench.iconTheme": "vscode-icons",
+    "bracket-pair-colorizer-2.depreciation-notice": false,
+    "editor.fontSize": 13,
+    "editor.formatOnSave": true,
+    "typescript.implementationsCodeLens.enabled": true,
+    "javascript.referencesCodeLens.enabled": true,
+    "typescript.referencesCodeLens.enabled": true,
+    "typescript.referencesCodeLens.showOnAllFunctions": true,
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "[yaml]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
+}

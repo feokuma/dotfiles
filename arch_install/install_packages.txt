@@ -1,6 +1,7 @@
 kitty
 alacritty
 wget
+nerd-fonts-cascadia-code
 tmux
 nodejs
 npm
@@ -9,3 +10,4 @@ docker
 docker-compose
 dotnet-sdk-bin
 postman-bin
+visual-studio-code-bin
