@@ -1,7 +1,5 @@
 [code]
 	editor = code
-[credencials]
-	helper = store
 [commit]
 	editor = nvim
 [core]
@@ -11,3 +9,5 @@
 [user]
 	email = feokuma@gmail.com
 	name = Fernando Okuma
+[credential]
+	helper = store
