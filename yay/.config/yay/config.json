@@ -1,0 +1,18 @@
+{
+  "editmenu": true,
+  "editmenu_search_providers": ["web", "aur", "pacman"],
+  "combinedupgrade": true,
+  "devel": true,
+  "provides": true,
+  "answerclean": "N",
+  "answerdiff": "N",
+  "answeredit": "N",
+  "answershow": "Y",
+  "pacman_color": true,
+  "color": true,
+  "parallelDownloads": 5,
+  "concurrentBuilds": 4,
+  "buildDir": "~/.cache/yay/build",
+  "removeBuildDir": true,
+  "cleanBuildDir": true
+}

@@ -1,0 +1,7 @@
+[init]
+	defaultBranch = main
+[user]
+	email = feokuma@gmail.com
+	name = Fernando Okuma
+[core]
+	editor = nvim

@@ -1,0 +1,59 @@
+format = """
+\
+$directory\
+$git_branch\
+$git_status\
+$nodejs\
+$rust\
+$golang\
+$php\
+$dotnet\
+$time\
+\n$character"""
+
+[directory]
+format = "[ $path ]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"Documents" = " "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+
+[git_branch]
+symbol = ""
+style = "bg:#394260"
+format = '[$symbol $branch ](fg:#769ff0)'
+
+[git_status]
+style = "bg:#394260"
+format = '[[($all_status$ahead_behind )](fg:#769ff0)]($style)'
+
+[nodejs]
+symbol = ""
+style = "bg:#212736"
+format = '[[$symbol ](fg:#769ff0)]($style)'
+
+[rust]
+symbol = ""
+style = "bg:#212736"
+format = '[[$symbol ](fg:#769ff0)]($style)'
+
+[golang]
+symbol = "ﳑ"
+style = "bg:#212736"
+format = '[[$symbol ](fg:#769ff0)]($style)'
+
+[dotnet]
+symbol = ""
+style = "bg:#212736"
+format = '[[$symbol ](fg:#769ff0)]($style)'
+detect_files = ["*.sln", "*.csproj", "global.json"]
+
+[time]
+disabled = true
+time_format = "%R" # Hour:Minute Format
+style = "bg:#1d2230"
+format = '[[  $time ](fg:#a0a9cb)]($style)'

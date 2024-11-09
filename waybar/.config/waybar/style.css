@@ -1,0 +1,167 @@
+* {
+  border: none;
+  border-radius: 0;
+  font-family: "JetBrainsMono Nerd Font";
+  font-weight: bold;
+  font-size: 16px;
+  min-height: 0;
+}
+
+window#waybar {
+  background: rgba(21, 18, 27, 0);
+  color: #cdd6f4;
+}
+
+tooltip {
+  background: #1e1e2e;
+  border-radius: 10px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: #11111b;
+}
+
+#workspaces button {
+  padding: 6px;
+  color: #555555;
+  margin-right: 5px;
+}
+
+#workspaces button.active {
+  color: #111111;
+  background: #cdd6f4;
+  border-radius: 10px;
+}
+
+#workspaces button.urgent {
+  color: #11111b;
+  background: #a6e3a1;
+  border-radius: 10px;
+}
+
+#workspaces button:hover {
+  background: #11111b;
+  color: #cdd6f4;
+  border-radius: 10px;
+}
+
+#custom-power_profile,
+#custom-weather,
+#window,
+#clock,
+#battery,
+#pulseaudio,
+#network,
+#bluetooth,
+#temperature,
+#workspaces,
+#tray,
+#taskbar,
+#backlight {
+  background: #1e1e2e;
+  opacity: 0.9;
+  padding: 0px 10px;
+  margin: 3px 0px;
+  margin-top: 5px;
+  border: 1px solid #181825;
+}
+
+#temperature {
+  border-radius: 0px 0px 0px 0px;
+}
+
+#temperature.critical {
+  color: #eba0ac;
+}
+
+#backlight {
+  border-radius: 10px 0px 0px 10px;
+}
+
+#tray {
+  border-radius: 10px;
+  margin-right: 10px;
+}
+
+#workspaces {
+  background: #1e1e2e;
+  border-radius: 10px;
+  margin-left: 10px;
+  padding-right: 0px;
+  padding-left: 5px;
+}
+
+#custom-power_profile {
+  color: #a6e3a1;
+  border-left: 0px;
+  border-right: 0px;
+}
+
+#window {
+  border-radius: 10px;
+  margin-left: 60px;
+  margin-right: 60px;
+}
+
+#clock {
+  color: #fab387;
+  border-radius: 10px 10px 10px 10px;
+  margin-right: 5px;
+  border-right: 0px;
+}
+
+#network {
+  color: #f9e2af;
+  border-radius: 10px 0px 0px 10px;
+  border-left: 0px;
+  border-right: 0px;
+}
+
+#bluetooth {
+  color: #89b4fa;
+  border-radius: 0px 10px 10px 0px;
+  margin-right: 10px;
+}
+
+#pulseaudio {
+  color: #89b4fa;
+  border-left: 0px;
+  border-right: 0px;
+}
+
+#pulseaudio.microphone {
+  color: #cba6f7;
+  border-left: 0px;
+  border-right: 0px;
+  border-radius: 0px 10px 10px 0px;
+  margin-right: 5px;
+}
+
+#battery {
+  color: #a6e3a1;
+  border-radius: 10px 10px 10px 10px;
+  margin-right: 10px;
+  border-left: 0px;
+}
+
+#custom-weather {
+  border-radius: 10px 10px 10px 10px;
+  border-right: 0px;
+  margin-left: 5px;
+}
+
+#taskbar {
+  border-radius: 10px;
+  margin-left: 5px;
+}
+
+#taskbar button {
+  border-radius: 3px 3px 3px 3px;
+  padding: 0 5px 0 5px;
+  margin: 3px 1px;
+  color: #ffffff;
+  background-color: rgba(120, 118, 117, 0);
+}
+
+#taskbar button.active {
+  background-color: rgba(120, 118, 117, 0.5);
+}
