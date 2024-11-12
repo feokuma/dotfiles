@@ -98,10 +98,10 @@ export NVM_DIR="$HOME/.nvm"
 export TERM="xterm-256color"
 export DOTNET_ROOT="$HOME/.dotnet"
 export PATH="$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools"
-
 export QT_QPA_PLATFORMTHEME=qt6ct
 
-export OPENAI_KEY="sk-proj-J9PnG9zqzEEOm49ED0SfT3BlbkFJgjt1CaNVI5eaJpJYsbRp"
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export WAYLAND_DISPLAY=wayland-1
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
