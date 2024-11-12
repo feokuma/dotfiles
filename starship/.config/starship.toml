@@ -11,6 +11,8 @@ $dotnet\
 $time\
 \n$character"""
 
+add_newline = false
+
 [directory]
 format = "[ $path ]($style)"
 truncation_length = 3
