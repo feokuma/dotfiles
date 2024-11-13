@@ -19,10 +19,11 @@ truncation_length = 3
 truncation_symbol = "…/"
 
 [directory.substitutions]
-"Documents" = " "
-"Downloads" = " "
-"Music" = " "
-"Pictures" = " "
+"Documents" = "󰈙 Documents"
+"Downloads" = " Downloads"
+"Music" = " Music"
+"Pictures" = " Pictures"
+"Develop" = "󰘦 Develop"
 
 [git_branch]
 symbol = ""
@@ -34,7 +35,7 @@ style = "bg:#394260"
 format = '[[($all_status$ahead_behind )](fg:#769ff0)]($style)'
 
 [nodejs]
-symbol = ""
+symbol = "󰎙"
 style = "bg:#212736"
 format = '[[$symbol ](fg:#769ff0)]($style)'
 
@@ -49,10 +50,10 @@ style = "bg:#212736"
 format = '[[$symbol ](fg:#769ff0)]($style)'
 
 [dotnet]
-symbol = ""
+symbol = ""
 style = "bg:#212736"
 format = '[[$symbol ](fg:#769ff0)]($style)'
-detect_files = ["*.sln", "*.csproj", "global.json"]
+detect_files = ["*.csproj"]
 
 [time]
 disabled = true
