@@ -15,3 +15,5 @@ end, { expr = true, silent = true })
 keymap.set("i", "<C-x>", function()
   return vim.fn["codeium#Clear"]()
 end, { expr = true, silent = true })
+
+keymap.set("n", "<leader>cf", ":!dotnet format<CR>", { desc = "Format .NET core" })

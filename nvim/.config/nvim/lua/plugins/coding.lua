@@ -34,15 +34,6 @@ return {
         null_ls.builtins.formatting.prettier,
         null_ls.builtins.diagnostics.eslint,
       })
-
-      table.insert(
-        opts.sources,
-        null_ls.builtins.formatting.custom.with({
-          command = "svgo",
-          args = { "--input", "$FILENAME" },
-          filetypes = { "svg" },
-        })
-      )
     end,
   },
 }
