@@ -1,0 +1,40 @@
+[global]
+font = JetBrainsMono Nerd Font 11
+markup = full
+format = "<b>%s</b>\n%b"
+alignment = left
+vertical_alignment = center
+horizontal_padding = 16
+text_icon_padding = 8
+separator_height = 2
+padding = 10
+frame_width = 2
+frame_color = "#89b4fa"
+separator_color = frame
+corner_radius = 10
+transparency = 10
+idle_threshold = 120
+show_indicators = yes
+word_wrap = yes
+ignore_newline = no
+geometry = "800x5-30+50"
+monitor = 0
+
+[urgency_low]
+background = "#1e1e2e"
+foreground = "#cdd6f4"
+frame_color = "#89dceb"
+timeout = 3
+
+[urgency_normal]
+background = "#1e1e2e"
+foreground = "#cdd6f4"
+frame_color = "#89b4fa"
+timeout = 6
+
+[urgency_critical]
+background = "#1e1e2e"
+foreground = "#f38ba8"
+frame_color = "#f38ba8"
+timeout = 0
+
