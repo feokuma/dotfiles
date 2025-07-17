@@ -6,9 +6,14 @@
   "passthrough": false,
   "gtk-layer-shell": true,
   "height": 40,
-  "modules-left": ["custom/weather", "hyprland/workspaces"],
+  "modules-left": [
+    "custom/weather",
+    "hyprland/workspaces"
+  ],
   //"modules-center": ["hyprland/window"],
-  "modules-center": ["clock"],
+  "modules-center": [
+    "clock"
+  ],
   "modules-right": [
     "tray",
     "network",
@@ -56,7 +61,9 @@
   "tray": {
     "icon-size": 18,
     "spacing": 10,
-    "show-items": ["all"],
+    "show-items": [
+      "all"
+    ],
   },
   "clock": {
     "format": "  {:%I:%M%p}",
@@ -70,7 +77,11 @@
   "backlight": {
     "device": "intel_backlight",
     "format": "{icon} {percent}%",
-    "format-icons": ["󰃞", "󰃟", "󰃠"],
+    "format-icons": [
+      "󰃞",
+      "󰃟",
+      "󰃠"
+    ],
     "on-scroll-up": "brightnessctl set 1%+",
     "on-scroll-down": "brightnessctl set 1%-",
     "min-length": 6,
@@ -85,7 +96,19 @@
     "format-charging": " {capacity}%",
     "format-plugged": " {capacity}%",
     "format-alt": "{time} {icon}",
-    "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+    "format-icons": [
+      "󰂎",
+      "󰁺",
+      "󰁻",
+      "󰁼",
+      "󰁽",
+      "󰁾",
+      "󰁿",
+      "󰂀",
+      "󰂁",
+      "󰂂",
+      "󰁹"
+    ],
   },
   "pulseaudio": {
     "format": "{icon} {volume}%",
@@ -102,7 +125,11 @@
       "phone": "",
       "portable": "",
       "car": "",
-      "default": ["", "", ""],
+      "default": [
+        "",
+        "",
+        ""
+      ],
     },
   },
   "pulseaudio#microphone": {
@@ -121,14 +148,24 @@
     "format-critical": "{temperatureC}°C ",
   },
   "network": {
-    // "interface": "wlp2*", // (Optional) To force the use of this interface
+    "interface": "wlan0", // ou "wlp2s0" ou o nome da sua interface
     "format-wifi": "  {signalStrength}%",
-    "format-ethernet": "{ipaddr}/{cidr}",
-    "tooltip-format": "{essid} - {ifname} via {gwaddr}",
-    "format-linked": "{ifname} (No IP)",
-    "format-disconnected": "Disconnected ⚠",
-    "format-alt": "{ifname}:{essid} {ipaddr}/{cidr}",
+    "format-ethernet": "  {ifname}",
+    "format-disconnected": "󰖪",
+    "tooltip-format": "{ipaddr} via {gwaddr}",
+    "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{ipaddr}",
+    "tooltip-format-ethernet": "{ifname}\n{ipaddr}",
+    "on-click": "networkmanager_dmenu" // se estiver usando como atalho
   },
+  //  "network": {
+  // "interface": "wlp2*", // (Optional) To force the use of this interface
+  //"format-wifi": "  {signalStrength}%",
+  //"format-ethernet": "{ipaddr}/{cidr}",
+  //"tooltip-format": "{essid} - {ifname} via {gwaddr}",
+  //"format-linked": "{ifname} (No IP)",
+  //"format-disconnected": "Disconnected ⚠",
+  //"format-alt": "{ifname}:{essid} {ipaddr}/{cidr}",
+  //},
   "bluetooth": {
     "format": " {status}",
     "format-disabled": "", // an empty format will hide the module
@@ -136,6 +173,7 @@
     "tooltip-format": "{device_alias}",
     "tooltip-format-connected": " {device_enumerate}",
     "tooltip-format-enumerate-connected": "{device_alias}",
+    "on-click": "blueman-manager"
   },
   "wireplumber": {
     "format": "{icon} {volume}%",
@@ -150,7 +188,11 @@
       "phone": "",
       "portable": "",
       "car": "",
-      "default": ["", "", ""],
+      "default": [
+        "",
+        "",
+        ""
+      ],
     },
   },
 }
