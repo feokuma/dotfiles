@@ -73,12 +73,22 @@ export ZSH="$HOME/.oh-my-zsh"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
 	git
+  rails
+  bundler
+  docker 
+  dotnet 
+  kubectl
+  systemd
+  yarn
+  npm
 	zsh-syntax-highlighting
 	zsh-autosuggestions
 )
 
 source $ZSH/oh-my-zsh.sh
 
+fpath+=~/.oh-my-zsh/completions
+autoload -Uz compinit && compinit
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
@@ -89,17 +99,19 @@ export NVM_DIR="$HOME/.nvm"
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 export TERM="xterm-256color"
-export DOTNET_ROOT="$HOME/.dotnet"
-export PATH="$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools"
-#export QT_QPA_PLATFORMTHEME=qt6ct
-
 export XDG_RUNTIME_DIR="/run/user/$(id -u)"
-#export WAYLAND_DISPLAY=wayland-1
+export GTK_THEME="catppuccin-mocha-lavender-standard+default"
 
+export DOTNET_ROOT="$HOME/.dotnet"
+export DOTNET_ROOT_X64="$HOME/.dotnet"
+
+export PATH="$HOME/.dotnet:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.rbenv/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
 
-export GTK_THEME="catppuccin-mocha-blue-standard+default"
 
+export MANPAGER="nvim +Man!"
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
@@ -119,9 +131,25 @@ export GTK_THEME="catppuccin-mocha-blue-standard+default"
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias ports='sudo lsof -i -P -n | grep LISTEN'
-cd ~
+alias code="code --enable-features=UseOzonePlatform,WaylandWindowDecorations --ozone-platform-hint=auto"
+#alias ports='sudo lsof -i -P -n | grep LISTEN'
+alias ports='sudo lsof -i -P -n | awk '\''NR==1 || /LISTEN/'\'''
+
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 #[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 eval "$(starship init zsh)"
+eval "$(rbenv init -)"
+
+
+# pnpm
+export PNPM_HOME="/home/feokuma/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+
+# Load Angular CLI autocompletion.
+source <(ng completion script)
