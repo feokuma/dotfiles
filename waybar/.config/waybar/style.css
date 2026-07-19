@@ -138,6 +138,21 @@ tooltip {
   margin-right: 5px;
 }
 
+#wireplumber {
+  color: @blue;
+  border-left: 0px;
+  border-right: 0px;
+  margin-right: 5px;
+}
+
+#pipewire.microphone {
+  color: @mauve;
+  border-left: 0px;
+  border-right: 0px;
+  border-radius: 0px 10px 10px 0px;
+  margin-right: 5px;
+}
+
 #battery {
   color: @green;
   border-radius: 10px 10px 10px 10px;

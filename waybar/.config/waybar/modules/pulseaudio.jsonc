@@ -1,0 +1,15 @@
+{
+  "format": "{icon} {volume}%",
+  "format-muted": "🔇",
+  "format-icons": {
+    "headphones": "🎧",
+    "handsfree": "🎤",
+    "default": [
+      "🔈",
+      "🔉",
+      "🔊"
+    ]
+  },
+  "on-click": "pavucontrol",
+  "on-click-right": "pactl set-source-mute @DEFAULT_SOURCE@ toggle"
+}
