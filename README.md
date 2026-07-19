@@ -12,6 +12,26 @@ Antes de começar é importante que este repositório seja clonado na raiz do di
 
 Nesta sessão serão mostrados os comandos usados para restaurar os arquivos para o diretório do **user** e para os diretórios do sistema. Em todos os comandos é necessário estar na raiz do diretório Dotfiles
 
+## Instalando aplicações
+
+Antes de executar o `stow`, é possível instalar os pacotes usados pelas configurações versionadas com o script:
+
+```shell
+scripts/install-packages.sh
+```
+
+O script lê o manifesto `scripts/packages.conf`. Sem argumentos, instala todos os pacotes listados. Também é possível instalar apenas um subconjunto:
+
+```shell
+scripts/install-packages.sh nvim zsh kitty
+```
+
+Para conferir o que seria executado sem instalar nada:
+
+```shell
+scripts/install-packages.sh --dry-run hyprland waybar
+```
+
 ### Restaurando arquivos no diretório do usuário
 
 Este processo é mais simples porque o usuário terá acesso liberado para fazer a criação dos links
