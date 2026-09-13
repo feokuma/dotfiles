@@ -20,17 +20,19 @@ QtObject {
     readonly property int pillHeight: 38
     readonly property int pillPaddingH: 16
     readonly property int pillPaddingV: 8
-    readonly property int itemSpacing: 10
+    readonly property int itemSpacing: 5
 
     // Typography
     readonly property string fontFamily: "JetBrainsMono Nerd Font"
     readonly property int fontSize: 15
     readonly property bool fontBold: true
 
-    // Semantic colors (current values only, no new palette yet)
-    readonly property color accent: "#cdd6f4"
+    // Semantic colors
     readonly property color text: "#cdd6f4"
     readonly property color textOnAccent: "black"
+    readonly property color highlight: "#cdd6f4"
+    readonly property color accent: "#89b4fa"
+    readonly property color accentSecondary: "#cba6f7"
     readonly property color success: "#a6e3a1"
     readonly property color warning: "#f38ba8"
 }

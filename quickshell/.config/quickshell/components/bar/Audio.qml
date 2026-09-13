@@ -161,7 +161,7 @@ Pill {
                 font.pixelSize: Theme.fontSize
                 font.family: Theme.fontFamily
                 font.bold: Theme.fontBold
-                color: "#89b4fa"
+                color: Theme.accent
                 text: {
                     if (!root.sinkAudio)
                         return `${root.sinkIcon()} N/A`;
@@ -195,7 +195,7 @@ Pill {
                 font.pixelSize: Theme.fontSize
                 font.family: Theme.fontFamily
                 font.bold: Theme.fontBold
-                color: "#cba6f7"
+                color: Theme.accentSecondary
                 text: {
                     if (!root.sourceAudio)
                         return `${root.micIcon()} N/A`;

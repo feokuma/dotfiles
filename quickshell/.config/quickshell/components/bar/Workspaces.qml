@@ -35,7 +35,7 @@ Pill {
                 // room inside the fixed pill (36 - 8 = 28, as before).
                 height: Theme.pillHeight - Theme.pillPaddingV
                 radius: Theme.pillRadius
-                color: delegateRoot.isFocused ? Theme.accent : "transparent"
+                color: delegateRoot.isFocused ? Theme.highlight : "transparent"
 
                 Text {
                     id: label
