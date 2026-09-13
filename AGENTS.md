@@ -648,13 +648,46 @@ starship:
 greetd:
 ```
 
+### Commit convention — Gitmoji (required)
+
+All commits MUST follow the [gitmoji](https://gitmoji.dev) convention. No commit without a gitmoji.
+
+Format:
+
+```text
+<emoji> <scope>: <short imperative description>
+```
+
+- `<emoji>` is the gitmoji unicode character (preferred) or its `:code:` equivalent — must be the first token of the commit message.
+- `<scope>` is one of the logical scopes above (lowercase, with colon).
+- Description is imperative, lowercase, without trailing period. Keep the subject line ≤ 72 chars.
+
+Common mappings (use the closest match from https://gitmoji.dev):
+
+| Emoji | Code | When to use |
+|-------|------|-------------|
+| ✨ | `:sparkles:` | new feature |
+| 🐛 | `:bug:` | bug fix |
+| 🎨 | `:art:` | structure / formatting improvement |
+| ♻️ | `:recycle:` | refactor |
+| 📝 | `:memo:` | documentation |
+| 🔧 | `:wrench:` | configuration / tooling |
+| 🚀 | `:rocket:` | deployment / performance improvement |
+| 🔥 | `:fire:` | remove code / files |
+| ✅ | `:white_check_mark:` | tests |
+| ⬆️ | `:arrow_up:` | dependency upgrade |
+| ⬇️ | `:arrow_down:` | dependency downgrade |
+
 Example commit messages:
 
 ```text
-hypr: add workspace keybindings
-quickshell: add clock widget
-quickshell: add PipeWire volume service
-starship: refine prompt layout
+✨ hypr: add workspace keybindings
+✨ quickshell: add clock widget
+🎨 quickshell: refactor bar components
+🐛 hypr: fix monitor scaling on eDP-1
+📝 docs: update install instructions
+🔧 zsh: update starship prompt layout
+♻️ quickshell: add PipeWire volume service
 ```
 
 ---
