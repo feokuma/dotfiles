@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 import "../../theme"
+import "../../utils"
 import "../../widgets"
 
 // Brightness pill. Container visuals live in Pill; content here.
@@ -28,11 +29,7 @@ Pill {
     property bool brightnessReady: false
     property bool maxReady: false
 
-    // Scroll smoothing — inline (will be extracted when Audio reuses it).
-    // Qt wheel delta is 120 per notch; threshold 120 = one step per notch.
-    // Legacy used 240; 120 feels more responsive for brightness. Keep 120.
-    property int accumulatedDelta: 0
-    readonly property int scrollThreshold: 120
+    // Scroll smoothing — shared via utils/ScrollHandler (threshold 120).
 
     // Derived percentage 0-100 from sysfs.
     readonly property int level: root.maxBrightness > 0 ? Math.round((root.rawBrightness / root.maxBrightness) * 100) : 0
@@ -82,19 +79,10 @@ Pill {
         root.setLevel(next);
     }
 
-    function handleWheel(deltaY: int): void {
-        if (deltaY === 0)
-            return;
-        if (root.accumulatedDelta !== 0 && Math.sign(root.accumulatedDelta) !== Math.sign(deltaY))
-            root.accumulatedDelta = 0;
-        root.accumulatedDelta += deltaY;
-        if (Math.abs(root.accumulatedDelta) < root.scrollThreshold)
-            return;
-        const direction = root.accumulatedDelta > 0 ? 1 : -1;
-        // Qt wheel: positive delta = scroll up -> increase brightness.
-        // Invert if needed: wheel up (positive) should increase.
-        root.accumulatedDelta -= direction * root.scrollThreshold;
-        root.step(direction);
+    ScrollHandler {
+        id: scrollHandler
+        threshold: 120
+        onStepped: direction => root.step(direction)
     }
 
     function parseIntSafe(text: string): int {
@@ -162,7 +150,7 @@ Pill {
         acceptedButtons: Qt.LeftButton
         onClicked: root.cyclePreset()
         onWheel: wheel => {
-            root.handleWheel(wheel.angleDelta.y);
+            scrollHandler.handleWheel(wheel.angleDelta.y);
             wheel.accepted = true;
         }
     }
