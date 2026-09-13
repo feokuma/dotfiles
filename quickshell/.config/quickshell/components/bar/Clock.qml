@@ -35,6 +35,6 @@ Item {
         font.bold: true
         color: "#fab387"
 
-        text: Qt.formatDateTime(systemClock.date, "  hh:mm AP")
+        text: Qt.formatDateTime(systemClock.date, "   hh:mmAP")
     }
 }
