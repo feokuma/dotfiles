@@ -39,6 +39,10 @@ ShellRoot {
 
             Brightness {}
 
+            Bluetooth {
+                Layout.preferredWidth: width
+            }
+
             Audio {}
 
             Battery {}
