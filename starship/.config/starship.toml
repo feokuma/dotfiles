@@ -1,110 +1,238 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Powerlevel10k lean — minimalista, sem powerline
+# Inspirado no p10k lean (fundo transparente, só foreground)
+# Linha 1: diretório + git
+# Linha 2: ❯ (verde ok / vermelho erro)
+
 add_newline = true
-palette = "catppuccin_mocha"
+palette = "p10k_lean"
+continuation_prompt = "[❯❯](dimmed fg:overlay0)"
 
 format = """
+$os\
 $directory\
 $git_branch\
 $git_status\
-$fill\
-$cmd_duration\
 $line_break\
-$character
-"""
+$character"""
 
 right_format = """
 $status\
+$cmd_duration\
 $jobs\
 $nodejs\
-$dotnet\
-$java\
+$bun\
+$python\
+$rust\
 $golang\
-$python
-"""
+$java\
+$dotnet\
+$username\
+$hostname\
+$time"""
 
+[palettes.p10k_lean]
+dir = "#268bd2"      # azul p10k lean (DIR_FOREGROUND=31)
+git = "#859900"      # verde git limpo
+dirty = "#b58900"    # amarelo git sujo / ahead/behind
+error = "#dc322f"    # vermelho status
+success = "#859900"
+overlay0 = "#6c7086" # cinza para duração/tempo
+grey = "#8a8a8a"
+cyan = "#2aa198"
+yellow = "#b58900"
+green = "#859900"
+red = "#dc322f"
+peach = "#cb4b16"
+mauve = "#6c71c4"
+blue = "#268bd2"
+
+[fill]
+symbol = " "
+style = ""
+
+# ── Diretório ────────────────────────────────────────────────
 [directory]
-style = "bold lavender"
-truncation_length = 4
-truncate_to_repo = false
+style = "bold dir"
+format = "[$path ]($style)[$read_only]($read_only_style)"
+truncation_length = 3
+truncation_symbol = "…/"
+truncate_to_repo = true
 read_only = " 󰌾"
+read_only_style = "bold red"
+# substitui ~ por ícone
+[directory.substitutions]
+"~" = " "
 
+# ── Git ──────────────────────────────────────────────────────
 [git_branch]
+only_attached = true
 symbol = " "
-style = "bold mauve"
-format = "[$symbol$branch]($style) "
+format = "[$symbol$branch(:$remote_branch) ]($style)"
+style = "bold git"
+truncation_length = 32
+truncation_symbol = "…"
+
+[git_commit]
+only_detached = true
+commit_hash_length = 7
+tag_disabled = false
+tag_symbol = "  "
+format = "[ $hash$tag ]($style)"
+style = "bold git"
+
+[git_state]
+format = "[$state( $progress_current/$progress_total) ]($style)"
+style = "bold dirty"
+rebase = "REBASE"
+merge = "MERGE"
+revert = "REVERT"
+cherry_pick = "CHERRY-PICK"
+bisect = "BISECT"
+am = "AM"
+am_or_rebase = "AM/REBASE"
+
+[git_metrics]
+disabled = true
+only_nonzero_diffs = true
+format = "([+$added ]($added_style))([-$deleted ]($deleted_style))"
+added_style = "git"
+deleted_style = "red"
 
 [git_status]
-style = "bold yellow"
-format = "([$all_status$ahead_behind]($style)) "
+# mostra só quando sujo/atrasado — colapsa quando limpo
+format = "([$all_status$ahead_behind ]($style))"
+style = "bold dirty"
+conflicted = "=${count}"
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕${count}"
+up_to_date = ""
+untracked = "?${count}"
+stashed = "*${count}"
+modified = "!${count}"
+staged = "+${count}"
+renamed = "»${count}"
+deleted = "✘${count}"
+typechanged = "T${count}"
 
-[cmd_duration]
-min_time = 1000
-format = "[󱦟 $duration](overlay1)"
+[os]
+disabled = false
+style = "bold cyan"
+format = "[$symbol]($style) "
 
+[os.symbols]
+Arch = "󰣇"
+Artix = "󰣇"
+Ubuntu = "󰕈"
+Debian = "󰣚"
+Mint = "󰣭"
+Pop = ""
+Fedora = "󰣛"
+Redhat = "󱄛"
+RedHatEnterprise = "󱄛"
+CentOS = ""
+SUSE = ""
+Gentoo = "󰣨"
+Manjaro = ""
+EndeavourOS = ""
+Alpine = ""
+Raspbian = "󰐿"
+Amazon = ""
+Android = ""
+AOSC = ""
+Linux = "󰌽"
+Macos = "󰀵"
+Windows = "󰍲"
+
+# ── Prompt ───────────────────────────────────────────────────
+[character]
+format = "$symbol "
+success_symbol = "[❯](bold success)"
+error_symbol = "[❯](bold error)"
+vimcmd_symbol = "[❮](bold yellow)"
+vimcmd_replace_one_symbol = "[❮](bold yellow)"
+vimcmd_replace_symbol = "[❮](bold yellow)"
+vimcmd_visual_symbol = "[❮](bold yellow)"
+
+# ── Direita ──────────────────────────────────────────────────
 [status]
 disabled = false
 symbol = "✘ "
 success_symbol = ""
-format = "[$symbol$status]($style) "
-style = "bold red"
+format = "[$symbol$status ]($style)"
+style = "bold error"
+map_symbol = true
+pipestatus = true
+pipestatus_separator = "|"
+pipestatus_format = "[$pipestatus]($style)"
+
+[cmd_duration]
+min_time = 500
+format = "[󰔛 $duration ]($style)"
+style = "overlay0"
 
 [jobs]
-symbol = "󰒋 "
-style = "bold teal"
+symbol = "✦"
+format = "[$symbol$number ]($style)"
+style = "bold cyan"
+
+[direnv]
+disabled = false
+symbol = "direnv"
+format = "[$symbol ]($style)"
+style = "yellow"
 
 [nodejs]
 symbol = " "
-format = "[$symbol$version]($style) "
+format = "[$symbol$version ]($style)"
 style = "green"
 
-[dotnet]
-symbol = " "
-format = "[$symbol$version]($style) "
-style = "mauve"
-
-[java]
-symbol = " "
-format = "[$symbol$version]($style) "
-style = "peach"
-
-[golang]
-symbol = " "
-format = "[$symbol$version]($style) "
-style = "blue"
+[bun]
+symbol = " "
+format = "[$symbol$version ]($style)"
+style = "green"
 
 [python]
 symbol = " "
-format = "[$symbol$version]($style) "
+format = "[$symbol$version( \\($virtualenv\\)) ]($style)"
 style = "yellow"
 
-[character]
-success_symbol = "[❯](bold green)"
-error_symbol = "[❯](bold red)"
-vimcmd_symbol = "[❮](bold yellow)"
+[rust]
+symbol = " "
+format = "[$symbol$version ]($style)"
+style = "red"
 
-[palettes.catppuccin_mocha]
-rosewater = "#f5e0dc"
-flamingo = "#f2cdcd"
-pink = "#f5c2e7"
-mauve = "#cba6f7"
-red = "#f38ba8"
-maroon = "#eba0ac"
-peach = "#fab387"
-yellow = "#f9e2af"
-green = "#a6e3a1"
-teal = "#94e2d5"
-sky = "#89dceb"
-sapphire = "#74c7ec"
-blue = "#89b4fa"
-lavender = "#b4befe"
-text = "#cdd6f4"
-subtext1 = "#bac2de"
-subtext0 = "#a6adc8"
-overlay2 = "#9399b2"
-overlay1 = "#7f849c"
-overlay0 = "#6c7086"
-surface2 = "#585b70"
-surface1 = "#45475a"
-surface0 = "#313244"
-base = "#1e1e2e"
-mantle = "#181825"
-crust = "#11111b"
+[golang]
+symbol = " "
+format = "[$symbol$version ]($style)"
+style = "cyan"
+
+[java]
+symbol = " "
+format = "[$symbol$version ]($style)"
+style = "peach"
+
+[dotnet]
+symbol = " "
+format = "[$symbol$version ]($style)"
+style = "mauve"
+
+[username]
+format = "[$user]($style)"
+style_user = "bold yellow"
+style_root = "bold red"
+show_always = false
+
+[hostname]
+format = "[@$hostname]($style)"
+style = "bold yellow"
+ssh_only = true
+
+[time]
+disabled = false
+time_format = "%R"
+format = "[ $time]($style)"
+style = "grey"
+use_12hr = false
