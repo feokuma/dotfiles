@@ -1,5 +1,6 @@
 import Quickshell
 import QtQuick
+import QtQuick.Layouts
 import "components/bar"
 import "theme"
 
@@ -28,12 +29,17 @@ ShellRoot {
             anchors.centerIn: parent
         }
 
-        Battery {
+        RowLayout {
             anchors {
                 right: parent.right
                 rightMargin: Theme.barMargin
                 verticalCenter: parent.verticalCenter
             }
+            spacing: Theme.itemSpacing
+
+            Brightness {}
+
+            Battery {}
         }
     }
 }
