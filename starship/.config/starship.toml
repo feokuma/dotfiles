@@ -61,8 +61,16 @@ truncation_symbol = "…/"
 truncate_to_repo = true
 read_only = " 󰌾"
 read_only_style = "bold red"
-# substitui ~ por ícone
+# ícones por diretório (substituições aplicadas ao path exibido)
+# ordem: mais específicos primeiro — starship prioriza chaves mais longas
 [directory.substitutions]
+"~/Downloads" = "󰇚 Downloads"
+"~/Documents" = "󰈙 Documents"
+"~/Pictures" = "󰉏 Pictures"
+"~/Develop" = "󰅨 Develop"
+"~/develop" = "󰅨 develop"
+"~/Projects" = "󰅨 Projects"
+"~/projects" = "󰅨 projects"
 "~" = " "
 
 # ── Git ──────────────────────────────────────────────────────
