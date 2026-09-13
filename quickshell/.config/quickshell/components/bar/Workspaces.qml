@@ -1,31 +1,19 @@
 import Quickshell.Hyprland
 import QtQuick
+import "../../theme"
+import "../../widgets"
 
-// Minimal workspaces pill. Visual values mirror Clock.qml
-// (black pill, radius 9, 0.7 opacity) as a starting point only;
-// TODO(theme): extract shared literals when Theme.qml is created.
-Item {
+// Workspaces pill. Container visuals live in Pill; content here.
+Pill {
     id: root
 
-    implicitWidth: background.width
-    implicitHeight: background.height
-
-    Rectangle {
-        id: background
-
-        color: "black"
-        radius: 9
-        opacity: 0.7
-
-        width: row.width + 16
-        height: row.height + 8
-    }
+    width: row.width + Theme.pillPaddingH
 
     Row {
         id: row
 
-        anchors.centerIn: background
-        spacing: 4
+        anchors.centerIn: parent
+        spacing: Theme.itemSpacing
 
         Repeater {
             // Filter at the model level (named workspaces have id < 0)
@@ -42,20 +30,22 @@ Item {
 
                 readonly property bool isFocused: modelData.focused ?? false
 
-                width: label.width + 16
-                height: label.height + 8
-                radius: 9
-                color: delegateRoot.isFocused ? "#fab387" : "transparent"
+                width: label.width + Theme.pillPaddingH
+                // Inner highlight keeps one vertical padding of breathing
+                // room inside the fixed pill (36 - 8 = 28, as before).
+                height: Theme.pillHeight - Theme.pillPaddingV
+                radius: Theme.pillRadius
+                color: delegateRoot.isFocused ? Theme.accent : "transparent"
 
                 Text {
                     id: label
 
                     anchors.centerIn: parent
                     text: delegateRoot.modelData.id
-                    font.pixelSize: 15
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.bold: true
-                    color: delegateRoot.isFocused ? "black" : "#cdd6f4"
+                    font.pixelSize: Theme.fontSize
+                    font.family: Theme.fontFamily
+                    font.bold: Theme.fontBold
+                    color: delegateRoot.isFocused ? Theme.textOnAccent : Theme.text
                 }
 
                 MouseArea {

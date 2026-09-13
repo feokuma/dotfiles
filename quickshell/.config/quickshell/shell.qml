@@ -1,6 +1,7 @@
 import Quickshell
 import QtQuick
 import "components/bar"
+import "theme"
 
 ShellRoot {
     PanelWindow {
@@ -12,13 +13,13 @@ ShellRoot {
             right: true
         }
 
-        // Bar height. Easy to adjust later; keep in one place.
-        implicitHeight: 42
+        // Bar height and margin live in Theme (theme/Theme.qml).
+        implicitHeight: Theme.barHeight
 
         Workspaces {
             anchors {
                 left: parent.left
-                leftMargin: 10
+                leftMargin: Theme.barMargin
                 verticalCenter: parent.verticalCenter
             }
         }
