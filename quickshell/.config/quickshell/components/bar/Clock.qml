@@ -21,7 +21,7 @@ Pill {
         font.pixelSize: Theme.fontSize
         font.family: Theme.fontFamily
         font.bold: Theme.fontBold
-        color: Theme.text
+        color: Theme.peach
 
         text: Qt.formatDateTime(systemClock.date, "  hh:mmAP")
     }
