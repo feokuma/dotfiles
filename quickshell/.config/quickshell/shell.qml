@@ -27,5 +27,13 @@ ShellRoot {
         Clock {
             anchors.centerIn: parent
         }
+
+        Battery {
+            anchors {
+                right: parent.right
+                rightMargin: Theme.barMargin
+                verticalCenter: parent.verticalCenter
+            }
+        }
     }
 }
