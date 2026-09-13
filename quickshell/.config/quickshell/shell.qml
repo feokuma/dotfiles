@@ -39,6 +39,8 @@ ShellRoot {
 
             Brightness {}
 
+            Audio {}
+
             Battery {}
         }
     }
