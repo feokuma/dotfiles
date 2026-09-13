@@ -23,6 +23,6 @@ Pill {
         font.bold: Theme.fontBold
         color: Theme.accent
 
-        text: Qt.formatDateTime(systemClock.date, "   hh:mmAP")
+        text: Qt.formatDateTime(systemClock.date, "  hh:mmAP")
     }
 }
