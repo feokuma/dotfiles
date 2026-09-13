@@ -20,7 +20,7 @@ QtObject {
     readonly property int pillHeight: 38
     readonly property int pillPaddingH: 16
     readonly property int pillPaddingV: 8
-    readonly property int itemSpacing: 4
+    readonly property int itemSpacing: 10
 
     // Typography
     readonly property string fontFamily: "JetBrainsMono Nerd Font"
