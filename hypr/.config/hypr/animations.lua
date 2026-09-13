@@ -1,53 +1,14 @@
+-- Animations: curves and per-leaf animation definitions.
+-- Deduplicated from the old look-and-feel module (fade*/layers were defined twice).
+-- See https://wiki.hypr.land/Configuring/Core/Animations/
+
 hl.config({
-    general = {
-        gaps_in  = 5,
-        gaps_out = 5,
-
-        border_size = 0,
-
-        col = {
-            active_border   = { colors = {"rgba(33ccffee)", "rgba(00ff99ee)"}, angle = 45 },
-            inactive_border = "rgba(595959aa)",
-        },
-
-        -- Set to true to enable resizing windows by clicking and dragging on borders and gaps
-        resize_on_border = true,
-
-        -- Please see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Tearing/ before you turn this on
-        allow_tearing = false,
-
-        layout = "dwindle",
-    },
-
-    decoration = {
-        rounding       = 10,
-        rounding_power = 2,
-
-        -- Change transparency of focused and unfocused windows
-        active_opacity   = 1.0,
-        inactive_opacity = 0.9,
-
-        shadow = {
-            enabled      = true,
-            range        = 4,
-            render_power = 3,
-            color        = 0xee1a1a1a,
-        },
-
-        blur = {
-            enabled   = true,
-            size      = 3,
-            passes    = 1,
-            vibrancy  = 0.1696,
-        },
-    },
-
     animations = {
         enabled = true,
     },
 })
 
--- Default curves and animations, see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Animations/
+-- Default curves
 hl.curve("easeOutQuint",   { type = "bezier", points = { {0.23, 1},    {0.32, 1}    } })
 hl.curve("easeInOutCubic", { type = "bezier", points = { {0.65, 0.05}, {0.36, 1}    } })
 hl.curve("linear",         { type = "bezier", points = { {0, 0},       {1, 1}       } })
@@ -68,10 +29,6 @@ hl.animation({ leaf = "fade",          enabled = true,  speed = 3.03, bezier = "
 hl.animation({ leaf = "layers",        enabled = true,  speed = 3.81, bezier = "easeOutQuint" })
 hl.animation({ leaf = "layersIn",      enabled = true,  speed = 4,    bezier = "easeOutQuint", style = "fade" })
 hl.animation({ leaf = "layersOut",     enabled = true,  speed = 1.5,  bezier = "linear",       style = "fade" })
-hl.animation({ leaf = "fadeIn",        enabled = true,  speed = 1.79, bezier = "almostLinear" })
-hl.animation({ leaf = "fadeOut",       enabled = true,  speed = 1.39, bezier = "almostLinear" })
-hl.animation({ leaf = "fade",          enabled = true,  speed = 3.03, bezier = "quick" })
-hl.animation({ leaf = "layers",        enabled = true,  speed = 3.81, bezier = "easeOutQuint" })
 hl.animation({ leaf = "workspaces",    enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "workspacesIn",  enabled = true,  speed = 1.21, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "workspacesOut", enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
