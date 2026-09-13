@@ -31,4 +31,6 @@ QtObject {
     readonly property color accent: "#cdd6f4"
     readonly property color text: "#cdd6f4"
     readonly property color textOnAccent: "black"
+    readonly property color success: "#a6e3a1"
+    readonly property color warning: "#f38ba8"
 }
