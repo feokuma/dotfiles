@@ -39,6 +39,10 @@ ShellRoot {
 
             Brightness {}
 
+            Network {
+                Layout.preferredWidth: width
+            }
+
             Bluetooth {
                 Layout.preferredWidth: width
             }
