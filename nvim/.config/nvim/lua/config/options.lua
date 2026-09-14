@@ -6,6 +6,7 @@ local opt = vim.opt
 -- Usa 2 espaços por padrão; QML usa `qmlformat` para formatação real.
 opt.shiftwidth = 2
 opt.tabstop = 2
+opt.clipboard = "unnamedplus"
 
 -- Relativenumber já vem do LazyVim; garante spell desligado em QML.
 -- (QML tem muitas palavras-chave que poluiriam o spell.)
