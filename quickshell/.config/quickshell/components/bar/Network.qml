@@ -49,17 +49,21 @@ Pill {
 
             watchDevice(d);
 
-            if (!d.connected)
-                continue;
-
-            isWifiConnected = true;
             const networks = d.networks.values;
+
             for (let j = 0; j < networks.length; j++) {
                 const net = networks[j];
+
+                watchNetwork(net, d.address);
+
                 if (!net.connected)
                     continue;
-                watchNetwork(net, d.address);
+
+                isWifiConnected = true;
+
                 signal = net.signalStrength;
+
+                break;
             }
         }
 
