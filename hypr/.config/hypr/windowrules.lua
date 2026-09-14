@@ -25,6 +25,16 @@ hl.window_rule({
 })
 
 hl.window_rule({
+    -- GTK portal dialogs (file chooser) open huge; keep them modest and centered.
+    name = "portal-dialogs-size",
+    match = { class = "xdg-desktop-portal-gtk" },
+
+    float = true,
+    size = { 1100, 650 },
+    center = true,
+})
+
+hl.window_rule({
     -- Satty (screenshot editor) should always open as a floating window.
     name = "satty-float",
     match = { class = "com.gabm.satty" },
