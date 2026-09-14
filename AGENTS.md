@@ -37,9 +37,10 @@ The long-term objective is for Quickshell to provide most desktop-shell function
    - Never run destructive filesystem, package-removal, bootloader, partitioning, or Btrfs commands without explicit approval.
 
 4. **Preserve a working desktop at every step.**
-   - Changes should be incremental and easy to revert.
-   - Avoid large rewrites unless specifically requested.
-   - Prefer one focused change per commit.
+    - Changes should be incremental and easy to revert.
+    - Avoid large rewrites unless specifically requested.
+    - Prefer one focused change per commit.
+    - Separate changes by context into distinct commits — do not bundle unrelated modifications (e.g., Hyprland config and Quickshell UI) into a single commit.
 
 5. **Do not introduce duplicate desktop components.**
    Unless explicitly requested, do not install or configure replacements for functionality intended to be built in Quickshell, including:
@@ -52,10 +53,15 @@ The long-term objective is for Quickshell to provide most desktop-shell function
    - wlogout
 
 6. **Use existing dedicated components when appropriate.**
-   Quickshell does not need to replace everything immediately.
-   - Keep `greetd + tuigreet` for login unless asked to build a Quickshell greeter.
-   - `hyprlock` and `hypridle` may be introduced later for locking and idle management.
-   - Do not replace stable infrastructure merely for aesthetic consistency.
+    Quickshell does not need to replace everything immediately.
+    - Keep `greetd + tuigreet` for login unless asked to build a Quickshell greeter.
+    - `hyprlock` and `hypridle` may be introduced later for locking and idle management.
+    - Do not replace stable infrastructure merely for aesthetic consistency.
+
+7. **Separate commits by context.**
+     - Each commit should contain changes from a single logical context (e.g., `hypr`, `quickshell`, `zsh`).
+     - Do not bundle unrelated modifications into a single commit.
+     - Use the suggested logical scopes when writing commit messages.
 
 ---
 
@@ -631,7 +637,9 @@ After changes:
 
 - review the diff;
 - avoid unrelated edits;
-- keep commits focused.
+- keep commits focused;
+- separate changes by context into distinct commits;
+- do not bundle unrelated modifications (e.g., Hyprland config and Quickshell UI) into a single commit when the changes do not belong to the same context.
 
 Never overwrite local uncommitted changes without explicit approval.
 
