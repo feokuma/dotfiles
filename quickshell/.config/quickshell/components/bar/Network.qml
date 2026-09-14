@@ -67,16 +67,10 @@ Pill {
         wifiSignal = signal;
     }
 
-    function networkIcon(): string {
-        if (!connected)
-            return "󰖪";
-        return " ";
-    }
-
     function networkLabel(): string {
         if (!connected)
-            return networkIcon();
-        return `${networkIcon()} ${Math.round(wifiSignal * 100)}%`;
+            return "󰖪";
+        return `  ${Math.round(wifiSignal * 100)}%`;
     }
 
     Component.onCompleted: {
