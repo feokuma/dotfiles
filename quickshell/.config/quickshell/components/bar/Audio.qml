@@ -1,3 +1,4 @@
+import Quickshell
 import Quickshell.Services.Pipewire
 import QtQuick
 import "../../theme"
@@ -5,10 +6,14 @@ import "../../utils"
 import "../../widgets"
 
 // Audio pill — output (sink) + microphone (source) inside a single Pill.
-// Uses Quickshell.Services.Pipewire exclusively: Pipewire.defaultAudioSink/
-// defaultAudioSource, audio.volume (0..1) and audio.muted. No wpctl fallback.
-// PwObjectTracker keeps both PwNodes bound so audio/properties stay reactive.
-// Pill remains visible when sink/source transiently null; shows N/A instead of collapsing.
+// Reads use Quickshell.Services.Pipewire: defaultAudioSink/defaultAudioSource,
+// audio.volume (0..1) and audio.muted (reactive via PwObjectTracker).
+// Writes: native for regular devices, but BlueZ nodes go through wpctl on the
+// default sink/source. Quickshell's native card-route channelVolumes writes are
+// ignored by bluez5 and, worse, target the HFP route index (routeDeviceIndexes
+// keeps the last route with device==1 = headset-hf-output), which can pull the
+// headset mic online at its fixed volume and flip profiles. wpctl never touches
+// card routes. Pill stays visible when sink/source are transiently null (N/A).
 Pill {
     id: root
 
@@ -56,16 +61,48 @@ Pill {
         return Math.max(0, Math.min(100, Math.round(v)));
     }
 
+    // BlueZ nodes (bluez_output.* / bluez_input.*): native card-route writes
+    // don't work and can misbehave, so use wpctl on the default device instead.
+    function isBluez(node): bool {
+        return node && node.name && node.name.startsWith("bluez_");
+    }
+
     function setSinkVolume(pct: int): void {
-        if (!sinkAudio)
+        const target = clampVolume(pct) / 100;
+        if (isBluez(root.sink)) {
+            Quickshell.execDetached(["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", target.toFixed(3)]);
             return;
-        sinkAudio.volume = clampVolume(pct) / 100;
+        }
+        if (sinkAudio)
+            sinkAudio.volume = target;
     }
 
     function setSourceVolume(pct: int): void {
-        if (!sourceAudio)
+        const target = clampVolume(pct) / 100;
+        if (isBluez(root.source)) {
+            Quickshell.execDetached(["wpctl", "set-volume", "@DEFAULT_AUDIO_SOURCE@", target.toFixed(3)]);
             return;
-        sourceAudio.volume = clampVolume(pct) / 100;
+        }
+        if (sourceAudio)
+            sourceAudio.volume = target;
+    }
+
+    function toggleSinkMute(): void {
+        if (isBluez(root.sink)) {
+            Quickshell.execDetached(["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"]);
+            return;
+        }
+        if (sinkAudio)
+            sinkAudio.muted = !sinkAudio.muted;
+    }
+
+    function toggleSourceMute(): void {
+        if (isBluez(root.source)) {
+            Quickshell.execDetached(["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"]);
+            return;
+        }
+        if (sourceAudio)
+            sourceAudio.muted = !sourceAudio.muted;
     }
 
     function stepSink(direction: int): void {
@@ -84,13 +121,11 @@ Pill {
 
     ScrollHandler {
         id: sinkScroll
-        threshold: 120
         onStepped: direction => root.stepSink(direction)
     }
 
     ScrollHandler {
         id: sourceScroll
-        threshold: 120
         onStepped: direction => root.stepSource(direction)
     }
 
@@ -172,10 +207,7 @@ Pill {
             MouseArea {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton
-                onClicked: {
-                    if (root.sinkAudio)
-                        root.sinkAudio.muted = !root.sinkAudio.muted;
-                }
+                onClicked: root.toggleSinkMute()
                 onWheel: wheel => {
                     sinkScroll.handleWheel(wheel.angleDelta.y);
                     wheel.accepted = true;
@@ -206,10 +238,7 @@ Pill {
             MouseArea {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton
-                onClicked: {
-                    if (root.sourceAudio)
-                        root.sourceAudio.muted = !root.sourceAudio.muted;
-                }
+                onClicked: root.toggleSourceMute()
                 onWheel: wheel => {
                     sourceScroll.handleWheel(wheel.angleDelta.y);
                     wheel.accepted = true;
