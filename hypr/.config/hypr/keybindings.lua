@@ -4,8 +4,6 @@
 -- NOTE: brightness keys require `brightnessctl` (not auto-installed):
 --   yay -S brightnessctl
 --
--- TODO (future): screenshot workflow (tool + bind) is intentionally out of
--- scope for this minimal restructure step.
 
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
@@ -55,6 +53,19 @@ hl.bind("XF86AudioMute",        hl.dsp.exec_raw("wpctl set-mute @DEFAULT_AUDIO_S
 hl.bind("XF86AudioMicMute",     hl.dsp.exec_raw("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_raw("brightnessctl -e4 -n2 set 5%+"),                  { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessDown",hl.dsp.exec_raw("brightnessctl -e4 -n2 set 5%-"),                  { locked = true, repeating = true })
+
+-- Screenshots
+-- All screenshot binds use exec_cmd because they require shell features:
+-- pipes to chain grim/slurp/satty/wl-copy. exec_raw cannot handle these.
+--
+-- Open in satty editor (preview, edit, save, copy from UI)
+-- satty -o presets the save path with a timestamped filename;
+-- the user can still choose a different location from the save dialog.
+hl.bind("Print",              hl.dsp.exec_cmd("grim - | satty -f - -o ~/Pictures/Screenshots/%Y%m%d_%H%M%S.png"))
+hl.bind("SHIFT + Print",      hl.dsp.exec_cmd("slurp | grim -g - - | satty -f - -o ~/Pictures/Screenshots/%Y%m%d_%H%M%S.png"))
+-- Quick copy to clipboard (no editor)
+hl.bind("CTRL + Print",       hl.dsp.exec_cmd("grim - | wl-copy"))
+hl.bind("CTRL + SHIFT + Print", hl.dsp.exec_cmd("slurp | grim -g - - | wl-copy"))
 
 -- Session / power
 hl.bind(mainMod .. " + M", hl.dsp.exit())
