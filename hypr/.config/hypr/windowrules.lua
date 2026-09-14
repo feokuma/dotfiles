@@ -1,5 +1,4 @@
 -- Window rules (see https://wiki.hypr.land/Configuring/Core/Rules/)
--- Screenshots are a future step, not implemented here.
 
 local suppressMaximizeRule = hl.window_rule({
     -- Ignore maximize requests from all apps. You'll probably like this.
@@ -23,4 +22,12 @@ hl.window_rule({
     },
 
     no_focus = true,
+})
+
+hl.window_rule({
+    -- Satty (screenshot editor) should always open as a floating window.
+    name = "satty-float",
+    match = { class = "com.gabm.satty" },
+
+    float = true,
 })
