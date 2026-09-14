@@ -37,4 +37,5 @@ QtObject {
     readonly property color warning: "#f38ba8"
     readonly property color textMuted: "#7f849c"
     readonly property color peach: "#ef9f76"
+    readonly property color yellow: "#f9e2af"
 }
