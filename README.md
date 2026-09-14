@@ -64,6 +64,11 @@ cada arquivo cuida de uma parte: `monitors`, `input`, `environment`,
 - Plugins do Zsh: `zsh-autosuggestions`, `zsh-syntax-highlighting`
 - `eza` (aliases de `ls` no `.zshrc`)
 - `wpctl` (PipeWire) e `brightnessctl` (teclas de mídia no Hyprland)
+- **`gnome-themes-extra`** — fornece o tema `Adwaita-dark` usado pelo
+  GTK3 (incl. `xdg-desktop-portal-gtk`, responsável pelos diálogos de
+  arquivo do Chrome/Chrome-based apps). Sem este pacote, o GTK não
+  encontra `Adwaita-dark` e cai no tema claro padrão, mesmo com
+  `prefer-dark` no gsettings
 - `stow` (para instalar os pacotes)
 
 ## Instalação
@@ -73,7 +78,7 @@ Clone para `~/.dotfiles` e ative os pacotes que quiser:
 ```bash
 git clone <este-repo> ~/.dotfiles
 cd ~/.dotfiles
-stow hypr quickshell nvim ghostty zsh starship xcompose
+stow hypr gtk quickshell nvim ghostty zsh starship xcompose
 ```
 
 Para ativar só um contexto:
