@@ -17,12 +17,17 @@ ShellRoot {
         // Bar height and margin live in Theme (theme/Theme.qml).
         implicitHeight: Theme.barHeight
 
-        Workspaces {
+        Row {
             anchors {
                 left: parent.left
                 leftMargin: Theme.barMargin
                 verticalCenter: parent.verticalCenter
             }
+            spacing: Theme.itemSpacing
+
+            HyprlandLogo {}
+
+            Workspaces {}
         }
 
         Clock {
