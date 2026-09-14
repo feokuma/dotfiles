@@ -18,7 +18,7 @@ QtObject {
     // 36 = measured text height at fontSize 15 (20px) + two paddings (2x8).
     // If fontSize grows a lot, raise pillHeight together so text never clips.
     readonly property int pillHeight: 38
-    readonly property int pillPaddingH: 16
+    readonly property int pillPaddingH: 26
     readonly property int pillPaddingV: 8
     readonly property int itemSpacing: 5
 

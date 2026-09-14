@@ -30,7 +30,7 @@ Pill {
 
                 readonly property bool isFocused: modelData.focused ?? false
 
-                width: label.width + Theme.pillPaddingH
+                width: label.width + 16//Theme.pillPaddingH
                 // Inner highlight keeps one vertical padding of breathing
                 // room inside the fixed pill (36 - 8 = 28, as before).
                 height: Theme.pillHeight - Theme.pillPaddingV
