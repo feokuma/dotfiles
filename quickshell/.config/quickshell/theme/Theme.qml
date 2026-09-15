@@ -1,5 +1,4 @@
 pragma Singleton
-import Quickshell
 import QtQuick
 
 // Central visual tokens for the bar.
