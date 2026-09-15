@@ -26,8 +26,10 @@ hl.window_rule({
 
 hl.window_rule({
     -- GTK portal dialogs (file chooser) open huge; keep them modest and centered.
+    -- Match both spellings: native Wayland uses lowercase, XWayland-parented
+    -- dialogs (e.g. Chrome running under --ozone-platform=x11) use capitalized.
     name = "portal-dialogs-size",
-    match = { class = "xdg-desktop-portal-gtk" },
+    match = { class = "^[Xx]dg-desktop-portal-gtk$" },
 
     float = true,
     size = { 1100, 650 },
