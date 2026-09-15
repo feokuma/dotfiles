@@ -14,57 +14,27 @@ Pill {
     width: batteryText.width + Theme.pillPaddingH
 
     readonly property int level: Math.round(UPower.displayDevice.percentage * 100)
-    readonly property bool charging: UPower.displayDevice.state === UPowerDeviceState.Charging
-        || UPower.displayDevice.state === UPowerDeviceState.PendingCharge
+    readonly property bool charging: UPower.displayDevice.state === UPowerDeviceState.Charging || UPower.displayDevice.state === UPowerDeviceState.PendingCharge
 
+    // Glyph codepoints verified against the installed font (JetBrainsMono Nerd Font Mono).
     function batteryIcon(): string {
         const level = root.level;
 
         if (root.charging) {
-            if (level >= 95)
-                return "󰂆";
-            if (level >= 85)
-                return "󰂏";
-            if (level >= 75)
-                return "󰂎";
-            if (level >= 65)
-                return "󰂍";
-            if (level >= 55)
-                return "󰂌";
-            if (level >= 45)
-                return "󰂋";
-            if (level >= 35)
-                return "󰂊";
-            if (level >= 25)
-                return "󰂉";
-            if (level >= 15)
-                return "󰂈";
-            if (level >= 5)
-                return "󰂇";
-            return "󰂄";
+            return "";
         }
 
-        if (level >= 95)
-            return "󰁹";
-        if (level >= 85)
-            return "󰂂";
-        if (level >= 75)
-            return "󰂁";
-        if (level >= 65)
-            return "󰂀";
-        if (level >= 55)
-            return "󰁿";
-        if (level >= 45)
-            return "󰁾";
-        if (level >= 35)
-            return "󰁽";
-        if (level >= 25)
-            return "󰁼";
+        if (level >= 90)
+            return "󰁹"; // md-battery (full)
+        if (level >= 60)
+            return "󰁿"; // md-battery-80
+        if (level >= 40)
+            return "󰁾 "; // md-battery-60
+        if (level >= 20)
+            return "󰁽"; // md-battery-40
         if (level >= 15)
-            return "󰁻";
-        if (level >= 5)
-            return "󰁺";
-        return "󰂃";
+            return "󰁼"; // md-battery-20
+        return "󰂎";     // md-battery-alert (low)
     }
 
     Text {
@@ -74,7 +44,7 @@ Pill {
         font.pixelSize: Theme.fontSize
         font.family: Theme.fontFamily
         font.bold: Theme.fontBold
-        color: root.level <= 20 ? Theme.warning : Theme.success
+        color: root.level <= 15 ? Theme.warning : Theme.success
 
         text: `${root.batteryIcon()} ${root.level}%`
     }
