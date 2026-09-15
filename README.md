@@ -43,9 +43,7 @@ pasta de primeiro nível é um pacote instalado a partir de `$HOME`.
 ├── ghostty/           # terminal (.config/ghostty/config)
 ├── zsh/               # shell interativo (.zshrc)
 ├── starship/          # prompt (.config/starship.toml)
-├── xcompose/          # tecla compose (.XCompose)
-├── chrome/            # flags do Chrome (.config/chrome-flags.conf)
-└── xresources/        # recursos X (.Xresources, Xft.dpi)
+└── xcompose/          # tecla compose (.XCompose)
 ```
 
 O módulo `hypr` é dividido por responsabilidade (`hyprland.lua` orquestra,
@@ -71,8 +69,6 @@ cada arquivo cuida de uma parte: `monitors`, `input`, `environment`,
   arquivo do Chrome/Chrome-based apps). Sem este pacote, o GTK não
   encontra `Adwaita-dark` e cai no tema claro padrão, mesmo com
   `prefer-dark` no gsettings
-- **`xorg-xrdb`** — carrega `~/.Xresources` no autostart do Hyprland
-  (necessário para a escala dos apps X11, ver abaixo)
 - `stow` (para instalar os pacotes)
 
 ## Instalação
@@ -96,33 +92,6 @@ Depois de alterar a configuração do Hyprland, recarregue com:
 ```bash
 hyprctl reload
 ```
-
-## Escala de apps X11 (XWayland)
-
-O painel interno (`eDP-1`, 2880x1800) usa escala `1.333333`. Com
-`xwayland { force_zero_scaling = true }` no Hyprland, os apps rodando
-em modo de compatibilidade X11 veem o framebuffer sem escala e precisam
-escalar sozinhos — caso contrário ficam pequenos demais na tela.
-
-A solução em duas partes:
-
-1. **App X11 genéricos**: o `autostart.lua` carrega `~/.Xresources`
-   (`xrdb -merge`) antes de lançar os apps. O arquivo define
-   `Xft.dpi: 128` (96 dpi × 1.333333 ≈ 128), então toolkits X11
-   (Chromium/Electron, xterm, etc.) escalam por conta própria.
-2. **Chrome**: o launcher oficial `/usr/bin/google-chrome-stable` lê
-   `~/.config/chrome-flags.conf` automaticamente. O pacote `chrome/`
-   roda o Chrome sob X11 (necessário para corrigir a configuração da
-   `ç` via XCompose) e aplica `--force-device-scale-factor=1.333333`
-   explicitamente.
-
-```bash
-stow xresources chrome
-sudo pacman -S xorg-xrdb
-```
-
-Não é preciso reiniciar o sistema: rode `xrdb -merge ~/.Xresources` e
-reabra os apps X11 afetados.
 
 ## Neovim + Quickshell
 
