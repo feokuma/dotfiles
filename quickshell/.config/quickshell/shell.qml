@@ -2,9 +2,11 @@
 // Required by SystemTrayItem.display() / native tray menus — needs a full
 // quickshell restart (not just file-watch reload) to take effect.
 import Quickshell
+import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 import "components/bar"
+import "components/launcher"
 import "theme"
 
 ShellRoot {
@@ -65,6 +67,18 @@ ShellRoot {
             Audio {}
 
             Battery {}
+        }
+    }
+
+    Launcher {
+        id: launcher
+    }
+
+    IpcHandler {
+        target: "launcher"
+
+        function toggleLauncher() {
+            launcher.toggle();
         }
     }
 }
