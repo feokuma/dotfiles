@@ -9,7 +9,7 @@ local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
 -- Applications
 hl.bind(mainMod .. " + Q", hl.dsp.exec_raw("ghostty"))
-hl.bind(mainMod .. " + B", hl.dsp.exec_raw("google-chrome-stable"))
+hl.bind(mainMod .. " + B", hl.dsp.exec_raw("firefox"))
 
 -- Window management
 hl.bind("ALT + F4", hl.dsp.window.close())
