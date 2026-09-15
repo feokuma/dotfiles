@@ -1,3 +1,6 @@
+//@ pragma UseQApplication
+// Required by SystemTrayItem.display() / native tray menus — needs a full
+// quickshell restart (not just file-watch reload) to take effect.
 import Quickshell
 import QtQuick
 import QtQuick.Layouts
@@ -6,6 +9,8 @@ import "theme"
 
 ShellRoot {
     PanelWindow {
+        id: barWindow
+
         color: "transparent"
 
         anchors {
@@ -43,6 +48,11 @@ ShellRoot {
             spacing: Theme.itemSpacing
 
             Brightness {}
+
+            Tray {
+                parentWindow: barWindow
+                Layout.preferredWidth: width
+            }
 
             Network {
                 Layout.preferredWidth: width
