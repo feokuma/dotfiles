@@ -40,4 +40,13 @@ QtObject {
 
     // System tray
     readonly property int trayIconSize: 20
+
+    // Notifications
+    readonly property int notificationWidth: 400
+    readonly property int notificationTopGap: 4 // gap below the bar's bottom edge
+    readonly property int notificationPadding: 14
+    readonly property int notificationSpacing: 4
+    readonly property int notificationStackSpacing: 10
+    readonly property int notificationTimeoutSec: 5  // fallback for expireTimeout <= 0
+    readonly property int notificationMaxVisible: 5
 }

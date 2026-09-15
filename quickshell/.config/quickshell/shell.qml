@@ -7,6 +7,7 @@ import QtQuick
 import QtQuick.Layouts
 import "components/bar"
 import "components/launcher"
+import "components/notifications"
 import "theme"
 
 ShellRoot {
@@ -73,6 +74,8 @@ ShellRoot {
     Launcher {
         id: launcher
     }
+
+    Notifications {}
 
     IpcHandler {
         target: "launcher"
