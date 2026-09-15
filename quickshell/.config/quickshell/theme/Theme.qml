@@ -10,7 +10,7 @@ QtObject {
     readonly property int barMargin: 10
 
     // Pill
-    readonly property color pillBackground: "black"
+    readonly property color pillBackground: crust
     readonly property real pillOpacity: 0.7
     readonly property int pillRadius: 9
     // Fixed pill height shared by every bar pill (clock, workspaces).
@@ -28,7 +28,6 @@ QtObject {
 
     // Semantic colors
     readonly property color text: "#cdd6f4"
-    readonly property color textOnAccent: "black"
     readonly property color highlight: "#cdd6f4"
     readonly property color accent: "#89b4fa"
     readonly property color accentSecondary: "#cba6f7"
@@ -37,6 +36,7 @@ QtObject {
     readonly property color textMuted: "#7f849c"
     readonly property color peach: "#ef9f76"
     readonly property color yellow: "#f9e2af"
+    readonly property color crust: "#11111b"
 
     // System tray
     readonly property int trayIconSize: 20

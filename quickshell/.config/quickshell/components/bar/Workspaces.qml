@@ -45,7 +45,7 @@ Pill {
                     font.pixelSize: Theme.fontSize
                     font.family: Theme.fontFamily
                     font.bold: Theme.fontBold
-                    color: delegateRoot.isFocused ? Theme.textOnAccent : Theme.text
+                    color: delegateRoot.isFocused ? Theme.crust : Theme.text
                 }
 
                 MouseArea {
