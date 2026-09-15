@@ -12,6 +12,10 @@ hl.bind(mainMod .. " + Q", hl.dsp.exec_raw("ghostty"))
 hl.bind(mainMod .. " + B", hl.dsp.exec_raw("firefox"))
 
 -- Window management
+-- Launcher toggle stays inside the running Quickshell instance (IPC),
+-- so no new shell process is spawned.
+hl.bind("ALT + Space", hl.dsp.exec_raw("qs ipc call launcher toggleLauncher"))
+
 hl.bind("ALT + F4", hl.dsp.window.close())
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ action = "toggle" }))
