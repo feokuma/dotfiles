@@ -29,7 +29,7 @@ Pill {
         if (level >= 60)
             return "󰁿"; // md-battery-80
         if (level >= 40)
-            return "󰁾 "; // md-battery-60
+            return "󰁾"; // md-battery-60
         if (level >= 20)
             return "󰁽"; // md-battery-40
         if (level >= 15)

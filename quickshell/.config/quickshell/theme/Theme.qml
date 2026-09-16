@@ -39,9 +39,7 @@ QtObject {
     readonly property color success: palette.green
     readonly property color warning: palette.red
     readonly property color textMuted: palette.overlay1
-    // Legacy override: #ef9f76 does not match any Mocha palette entry
-    // (Mocha peach is fab387). Kept as a literal to preserve the current look.
-    readonly property color peach: "#ef9f76"
+    readonly property color peach: palette.peach
     readonly property color yellow: palette.yellow
     readonly property color crust: palette.crust
 

@@ -34,10 +34,8 @@ Pill {
     // Derived percentage 0-100 from sysfs.
     readonly property int level: root.maxBrightness > 0 ? Math.round((root.rawBrightness / root.maxBrightness) * 100) : 0
 
-    // MDI brightness-1..7: 󰃜 F00DC, 󰃝 F00DD, 󰃞 F00DE, 󰃟 F00DF, 󰃠 F00E0, 󰃡 F00E1, 󰃢 F00E2
-    // Corrigido: ordem monotônica crescente + thresholds lineares (20% steps).
-    // Antes 0% → 󰃞 (F00DE) e 15% → 󰃝 (F00DD) estavam invertidos (0% mais claro que 15%);
-    // e 55%+ usava 󰃠/󰃡/󰃢 muito próximos sem distinção clara.
+    // MDI brightness glyphs, lowest to brightest, with linear 20% thresholds.
+    // An earlier mapping had 0% brighter than 15%; fixed to monotonic order.
     function brightnessIcon(): string {
         const lvl = root.level;
         if (lvl <= 0)
@@ -63,7 +61,7 @@ Pill {
     }
 
     function step(direction: int): void {
-        // direction is -1 or 1; each step is 1% (ajuste fino).
+        // direction is -1 or 1; each step is 1%.
         root.setLevel(root.level + direction * 1);
     }
 

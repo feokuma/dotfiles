@@ -4,7 +4,7 @@ import QtQml
 // Qt wheel delta is 120 per notch; threshold 120 = one step per notch.
 // Direction sign: positive delta (wheel up) -> +1, negative -> -1.
 QtObject {
-    property int threshold: 1200
+    property int threshold: 120
     property int accumulatedDelta: 0
 
     signal stepped(int direction)

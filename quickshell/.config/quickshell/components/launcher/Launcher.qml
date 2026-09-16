@@ -8,7 +8,7 @@ import "../../theme"
 // near-opaque dark panel, tall rows with crisp icons, and a rounded
 // accent selection bar drawn behind the row content.
 //
-// Lives insid the running shell instance: open/close only toggles the
+// Lives inside the running shell instance: open/close only toggles the
 // window's visibility; Hyprland triggers it through the shell's IpcHandler
 // (see shell.qml, target "launcher").
 PanelWindow {
@@ -135,7 +135,6 @@ PanelWindow {
         // Same tokens as the bar pills. Opacity must be confined to this
         // rect, otherwise the whole overlay washes out.
         color: Theme.pillBackground
-        //opacity: Theme.pillOpacity
         radius: Theme.pillRadius
         border.width: 1
         border.color: Theme.highlight
