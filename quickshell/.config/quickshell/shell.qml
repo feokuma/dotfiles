@@ -65,10 +65,18 @@ ShellRoot {
                 Layout.preferredWidth: width
             }
 
-            Audio {}
+            Audio {
+                id: audio
+                popup: audioPopup
+            }
 
             Battery {}
         }
+    }
+
+    AudioPopup {
+        id: audioPopup
+        audioRef: audio
     }
 
     Launcher {

@@ -56,4 +56,10 @@ QtObject {
     readonly property int notificationStackSpacing: 10
     readonly property int notificationTimeoutSec: 5  // fallback for expireTimeout <= 0
     readonly property int notificationMaxVisible: 5
+
+    // Animation durations
+    readonly property int animFast: 150
+
+    // Audio popup
+    readonly property int popupTrackHeight: 10
 }

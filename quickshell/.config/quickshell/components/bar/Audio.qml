@@ -33,6 +33,13 @@ Pill {
     readonly property int sinkVolume: sinkAudio ? Math.round(sinkAudio.volume * 100) : 0
     readonly property int sourceVolume: sourceAudio ? Math.round(sourceAudio.volume * 100) : 0
 
+    // Mute flags exposed for the AudioPopup.
+    readonly property bool sinkMuted: sinkAudio ? sinkAudio.muted : true
+    readonly property bool sourceMuted: sourceAudio ? sourceAudio.muted : true
+
+    // Popup attached by shell.qml; clicks toggle it instead of muting.
+    property var popup: null
+
     // Headphone detection — only evaluated when node is bound (PwObjectTracker).
     // When muted, show muted variant (󰖁 / ) instead of " Muted" text, keeping volume number.
     function sinkIcon(): string {
@@ -207,7 +214,7 @@ Pill {
             MouseArea {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton
-                onClicked: root.toggleSinkMute()
+                onClicked: root.popup ? root.popup.toggle() : root.toggleSinkMute()
                 onWheel: wheel => {
                     sinkScroll.handleWheel(wheel.angleDelta.y);
                     wheel.accepted = true;
@@ -238,7 +245,7 @@ Pill {
             MouseArea {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton
-                onClicked: root.toggleSourceMute()
+                onClicked: root.popup ? root.popup.toggle() : root.toggleSourceMute()
                 onWheel: wheel => {
                     sourceScroll.handleWheel(wheel.angleDelta.y);
                     wheel.accepted = true;
