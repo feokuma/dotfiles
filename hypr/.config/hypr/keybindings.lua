@@ -92,3 +92,7 @@ hl.bind("CTRL + SHIFT + Print", hl.dsp.exec_cmd("slurp | grim -g - - | wl-copy")
 
 -- Session / power
 hl.bind(mainMod .. " + M", hl.dsp.exit())
+
+-- Manual lock. Ongoing locking (idle timeout, suspend) is managed by
+-- hypridle via its own config; this keybind is only for on-demand lock.
+hl.bind(mainMod .. " + L", hl.dsp.exec_raw("hyprlock"))
