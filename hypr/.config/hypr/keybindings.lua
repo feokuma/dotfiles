@@ -90,13 +90,13 @@ hl.bind("CTRL + SHIFT + Print", hl.dsp.exec_cmd("slurp | grim -g - - | wl-copy")
 -- Lid switch
 -- Hyprland owns the lid event: greetd launches the session wrapped in
 -- `systemd-inhibit --what=handle-lid-switch`, so logind ignores the lid
--- while Hyprland runs. On lid close: lock first, then suspend-then-
--- hibernate (same path as the idle pipeline in hypridle.conf). Lid open
--- needs no bind: any close implies a previous suspend, whose resume is
--- handled by hypridle (after_sleep_cmd + on-resume listener).
+-- while Hyprland runs. On lid close: lock first, then suspend (same
+-- path as the idle pipeline in hypridle.conf). Lid open needs no bind:
+-- any close implies a previous suspend, whose resume is handled by
+-- hypridle (after_sleep_cmd + on-resume listener).
 hl.bind(
 	"switch:on:Lid Switch",
-	hl.dsp.exec_cmd("pidof hyprlock || hyprlock; sleep 0.5; systemctl suspend-then-hibernate"),
+	hl.dsp.exec_cmd("pidof hyprlock || hyprlock; sleep 0.5; systemctl suspend"),
 	{ locked = true }
 )
 
