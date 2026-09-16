@@ -80,9 +80,24 @@ PanelWindow {
 
         opacity: root.isOpen ? 1 : 0
 
+        // Entrance like the Launcher, but dropping from the bar downward:
+        // fade plus a short slide-down (Launcher slides up from below).
+        readonly property int appearDuration: Theme.animFast
+
+        transform: Translate {
+            y: root.isOpen ? 0 : -14
+
+            Behavior on y {
+                NumberAnimation {
+                    duration: panel.appearDuration
+                    easing.type: Easing.OutCubic
+                }
+            }
+        }
+
         Behavior on opacity {
             NumberAnimation {
-                duration: Theme.animFast
+                duration: panel.appearDuration
                 easing.type: Easing.OutCubic
             }
         }
