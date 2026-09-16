@@ -129,8 +129,17 @@ PanelWindow {
         // Fixed vertical position, advancing downward as results appear.
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: 400
-        width: 850
+        // Vertical position as a percentage of the screen height, slightly
+        // above center; clamped so the panel never drifts too far on very
+        // short or very tall displays.
+        readonly property int minPctTop: 200
+        readonly property int maxPctTop: 500
+        anchors.topMargin: Math.min(Math.max(parent.height * 0.32, minPctTop), maxPctTop)
+        // Percentage of the screen width, clamped so the panel stays
+        // usable on very small or very large displays.
+        readonly property int minPctWidth: 500
+        readonly property int maxPctWidth: 1100
+        width: Math.min(Math.max(parent.width * 0.4, minPctWidth), maxPctWidth)
 
         // Same tokens as the bar pills. Opacity must be confined to this
         // rect, otherwise the whole overlay washes out.
