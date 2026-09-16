@@ -77,6 +77,18 @@ Pill {
         return `  ${Math.round(wifiSignal * 100)}%`;
     }
 
+    // Fallback resync: after suspend/resume, NM re-creates the network
+    // objects while the connection is still re-establishing, so the final
+    // `connected` transition can emit on an object this component started
+    // watching only afterwards — leaving the stale "disconnected" state.
+    // A cheap periodic re-scan fixes drift; normal updates stay event-driven.
+    Timer {
+        interval: 10000
+        running: true
+        repeat: true
+        onTriggered: root.refresh()
+    }
+
     Component.onCompleted: {
         refresh();
         Networking.devices.valuesChanged.connect(refresh);
