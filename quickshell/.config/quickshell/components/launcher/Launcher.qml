@@ -17,7 +17,7 @@ PanelWindow {
     property bool isOpen: false
     property string search: ""
     property int selectedIndex: 0
-    property int fontSize: Theme.fontSize + 10
+    property int fontSize: Theme.fontSize + 5
 
     // Spotlight-style highlight intensities, derived locally: only the
     // launcher selection bar uses these, so they don't warrant Theme tokens.
