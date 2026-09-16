@@ -26,11 +26,13 @@ Pill {
             delegate: Rectangle {
                 id: delegateRoot
 
+                readonly property int focusMarkWidth: 16
+
                 required property var modelData
 
                 readonly property bool isFocused: modelData.focused ?? false
 
-                width: label.width + Theme.pillPaddingH
+                width: label.width + focusMarkWidth
                 // Inner highlight keeps one vertical padding of breathing
                 // room inside the fixed pill (38 - 8 = 30).
                 height: Theme.pillHeight - Theme.pillPaddingV
