@@ -1,5 +1,6 @@
 pragma Singleton
 import QtQuick
+import "./colors"
 
 // Central visual tokens for the bar.
 // Values migrated from Clock.qml / Workspaces.qml / shell.qml;
@@ -26,17 +27,23 @@ QtObject {
     readonly property int fontSize: 15
     readonly property bool fontBold: true
 
+    // Palette flavor: swap this component to FrappeColors / LatteColors /
+    // MacchiatoColors (all defined in ./colors) to retheme the whole shell.
+    readonly property QtObject palette: MacchiatoColors {}
+
     // Semantic colors
-    readonly property color text: "#cdd6f4"
-    readonly property color highlight: "#cdd6f4"
-    readonly property color accent: "#89b4fa"
-    readonly property color accentSecondary: "#cba6f7"
-    readonly property color success: "#a6e3a1"
-    readonly property color warning: "#f38ba8"
-    readonly property color textMuted: "#7f849c"
+    readonly property color text: palette.text
+    readonly property color highlight: palette.text
+    readonly property color accent: palette.blue
+    readonly property color accentSecondary: palette.mauve
+    readonly property color success: palette.green
+    readonly property color warning: palette.red
+    readonly property color textMuted: palette.overlay1
+    // Legacy override: #ef9f76 does not match any Mocha palette entry
+    // (Mocha peach is fab387). Kept as a literal to preserve the current look.
     readonly property color peach: "#ef9f76"
-    readonly property color yellow: "#f9e2af"
-    readonly property color crust: "#11111b"
+    readonly property color yellow: palette.yellow
+    readonly property color crust: palette.crust
 
     // System tray
     readonly property int trayIconSize: 20
