@@ -1,9 +1,6 @@
 -- Keybindings, organized by responsibility.
 -- See https://wiki.hypr.land/Configuring/Core/Binds/
 --
--- NOTE: brightness keys require `brightnessctl` (not auto-installed):
---   yay -S brightnessctl
---
 
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
