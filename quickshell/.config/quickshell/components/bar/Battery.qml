@@ -1,11 +1,13 @@
 import QtQuick
 import Quickshell.Services.UPower
+import "../../services"
 import "../../theme"
 import "../../widgets"
 
 // Battery pill. Container visuals live in Pill; content here.
-// Uses Quickshell.Services.UPower (native, reactive) — no Process/Timer polling.
-// UPower.displayDevice.percentage is 0.0–1.0 (energy/energyCapacity), so *100.
+// Uses Quickshell.Services.UPower (native, reactive) — no Process/Timer
+// polling. Clicking (shell.qml wires the popup) opens the power-profile
+// selector. UPower.displayDevice.percentage is 0.0–1.0, so *100.
 Pill {
     id: root
 
@@ -49,28 +51,40 @@ Pill {
         text: `${root.batteryIcon()} ${root.level}%`
     }
 
-    // Hint color matches the icon for the current state (charge/low battery),
-    // mirroring the WiFi hint's icon-colored border.
     function batteryStatusColor(): color {
         if (root.charging)
             return Theme.success;
         return root.level <= 15 ? Theme.warning : Theme.success;
     }
 
-    // Hover target for the battery hint; hover-only, clicks stay untouched.
+    // Popup (PowerProfilesPopup) attached by shell.qml; clicking toggles it.
+    property var popup: null
+
+    // Hover target for the battery hint; clicks open the power-profile popup.
     MouseArea {
         id: hoverArea
 
         anchors.fill: parent
         hoverEnabled: true
-        acceptedButtons: Qt.NoButton
+        acceptedButtons: Qt.LeftButton
+        onClicked: {
+            if (root.popup)
+                root.popup.toggle();
+        }
     }
 
-    // Charge state shown below the pill while hovered.
+    function hoverText(): string {
+        const parts = [];
+        const p = PowerProfileService.profile;
+        if (p.length > 0)
+            parts.push(p.charAt(0).toUpperCase() + p.slice(1));
+        parts.push(root.charging ? "Charging" : "Discharging");
+        return parts.join(" · ");
+    }
+
     HoverHint {
         target: root
-        text: hoverArea.containsMouse
-            ? (root.charging ? "Charging" : "Discharging") : ""
+        text: hoverArea.containsMouse ? root.hoverText() : ""
         accent: root.batteryStatusColor()
     }
 }

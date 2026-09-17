@@ -72,8 +72,14 @@ ShellRoot {
                 popup: audioPopup
             }
 
-            Battery {}
+            Battery {
+                popup: powerProfilesPopup
+            }
         }
+    }
+
+    PowerProfilesPopup {
+        id: powerProfilesPopup
     }
 
     AudioPopup {
