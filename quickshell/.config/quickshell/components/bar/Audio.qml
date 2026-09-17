@@ -83,6 +83,28 @@ Pill {
     readonly property int defaultSinkId: sink ? sink.id : -1
     readonly property int defaultSourceId: source ? source.id : -1
 
+    // Display name of the active device, for popup hover hints. Same fallback
+    // chain as the dropdown rows (description → nickname → name).
+    readonly property string defaultSinkName: sink
+        ? (sink.description || sink.nickname || sink.name || "")
+        : ""
+    readonly property string defaultSourceName: source
+        ? (source.description || source.nickname || source.name || "")
+        : "N/A"
+
+    // Native default-switching only. The BlueZ/wpctl detour stays limited to
+    // per-node volume writes above; preferredDefault* is the compositor-level
+    // "which device do I want" mechanism and works the same for BlueZ nodes.
+    function setDefaultSink(node): void {
+        if (node)
+            Pipewire.preferredDefaultAudioSink = node;
+    }
+
+    function setDefaultSource(node): void {
+        if (node)
+            Pipewire.preferredDefaultAudioSource = node;
+    }
+
     // Popup attached by shell.qml; clicks toggle it instead of muting.
     property var popup: null
 
@@ -112,6 +134,21 @@ Pill {
 
     function clampVolume(v: int): int {
         return Math.max(0, Math.min(100, Math.round(v)));
+    }
+
+    // Hover hints — active device name shown below the hovered pill half
+    // (sink on the left, mic on the right). HoverHint (now widgets/HoverHint)
+    // is a click-through PopupWindow anchored to each half's Item.
+    HoverHint {
+        target: sinkItem
+        text: sinkArea.containsMouse ? root.defaultSinkName : ""
+        accent: Theme.accent
+    }
+
+    HoverHint {
+        target: sourceItem
+        text: sourceArea.containsMouse ? root.defaultSourceName : ""
+        accent: Theme.accentSecondary
     }
 
     // BlueZ nodes (bluez_output.* / bluez_input.*): native card-route writes
@@ -174,11 +211,13 @@ Pill {
 
     ScrollHandler {
         id: sinkScroll
+        threshold: 1200
         onStepped: direction => root.stepSink(direction)
     }
 
     ScrollHandler {
         id: sourceScroll
+        threshold: 1200
         onStepped: direction => root.stepSource(direction)
     }
 
@@ -258,8 +297,11 @@ Pill {
             }
 
             MouseArea {
+                id: sinkArea
+
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton
+                hoverEnabled: true
                 onClicked: root.popup ? root.popup.toggle() : root.toggleSinkMute()
                 onWheel: wheel => {
                     sinkScroll.handleWheel(wheel.angleDelta.y);
@@ -289,7 +331,10 @@ Pill {
             }
 
             MouseArea {
+                id: sourceArea
+
                 anchors.fill: parent
+                hoverEnabled: true
                 acceptedButtons: Qt.LeftButton
                 onClicked: root.popup ? root.popup.toggle() : root.toggleSourceMute()
                 onWheel: wheel => {
@@ -300,3 +345,4 @@ Pill {
         }
     }
 }
+
