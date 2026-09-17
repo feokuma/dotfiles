@@ -44,8 +44,33 @@ Pill {
         font.pixelSize: Theme.fontSize
         font.family: Theme.fontFamily
         font.bold: Theme.fontBold
-        color: root.level <= 15 ? Theme.warning : Theme.success
+        color: batteryStatusColor()
 
         text: `${root.batteryIcon()} ${root.level}%`
+    }
+
+    // Hint color matches the icon for the current state (charge/low battery),
+    // mirroring the WiFi hint's icon-colored border.
+    function batteryStatusColor(): color {
+        if (root.charging)
+            return Theme.success;
+        return root.level <= 15 ? Theme.warning : Theme.success;
+    }
+
+    // Hover target for the battery hint; hover-only, clicks stay untouched.
+    MouseArea {
+        id: hoverArea
+
+        anchors.fill: parent
+        hoverEnabled: true
+        acceptedButtons: Qt.NoButton
+    }
+
+    // Charge state shown below the pill while hovered.
+    HoverHint {
+        target: root
+        text: hoverArea.containsMouse
+            ? (root.charging ? "Charging" : "Discharging") : ""
+        accent: root.batteryStatusColor()
     }
 }
