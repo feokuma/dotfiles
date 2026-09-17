@@ -37,6 +37,52 @@ Pill {
     readonly property bool sinkMuted: sinkAudio ? sinkAudio.muted : true
     readonly property bool sourceMuted: sourceAudio ? sourceAudio.muted : true
 
+    // --- Device selection (AudioPopup dropdowns) ---------------------------------
+    // Touching .values creates a dependency on the model's valuesChanged, so
+    // the lists re-derive whenever nodes appear/disappear — no polling.
+    // Virtual/monitor nodes are excluded: grounded against pw-dump, real
+    // devices carry no `node.virtual`, so the predicate only drops
+    // virtual/monitorOf nodes when they appear.
+    function isVirtualNode(node): bool {
+        const props = node.properties || {};
+        const cls = props["media.class"] || "";
+        return props["node.virtual"] === "true" || cls.includes("Virtual") || props["stream.monitor"] === "true" || (node.name || "").endsWith(".monitor");
+    }
+
+    readonly property var sinkNodes: {
+        const out = [];
+        const vals = Pipewire.nodes.values;
+        for (let i = 0; i < vals.length; i++) {
+            const n = vals[i];
+            if (!n.isStream && n.isSink && !root.isVirtualNode(n))
+                out.push(n);
+        }
+        return out;
+    }
+
+    // Source nodes are identified by the PwNodeType.Source bitflag, NOT by
+    // media.class: `properties` is only populated once a node is tracked
+    // (PwObjectTracker binds only the defaults), so non-default mics would
+    // come through with empty properties and be silently dropped.
+    readonly property var sourceNodes: {
+        const out = [];
+        const vals = Pipewire.nodes.values;
+        for (let i = 0; i < vals.length; i++) {
+            const n = vals[i];
+            if (!n.isStream && !n.isSink && (n.type & PwNodeType.Source) && !root.isVirtualNode(n) &&
+            // V4L2 camera nodes carry the same Source bitflag but are
+            // video, not audio-input devices; properties are unreliable
+            // for untracked nodes so the name prefix is the discriminator.
+            !(n.name || "").startsWith("v4l2_"))
+                out.push(n);
+        }
+        return out;
+    }
+
+    // Active-device marker id; -1 when the default node is transiently null.
+    readonly property int defaultSinkId: sink ? sink.id : -1
+    readonly property int defaultSourceId: source ? source.id : -1
+
     // Popup attached by shell.qml; clicks toggle it instead of muting.
     property var popup: null
 

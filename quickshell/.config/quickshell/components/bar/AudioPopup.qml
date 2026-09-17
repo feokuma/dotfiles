@@ -148,6 +148,19 @@ PanelWindow {
                 }
             }
 
+            // Output device selector — click the header to expand the list.
+            DeviceDropdown {
+                width: content.width - content.leftPadding - content.rightPadding
+                label: "Output device"
+                nodes: root.audioRef ? root.audioRef.sinkNodes : []
+                currentId: root.audioRef ? root.audioRef.defaultSinkId : -1
+                accent: Theme.accent
+                onSelect: node => {
+                    if (root.audioRef)
+                        root.audioRef.setDefaultSink(node);
+                }
+            }
+
             // Microphone (source) row. Same glyphs as the bar pill
             // (FontAwesome U+F130 mic / U+F131 mic-mute) for visual
             // consistency; the MDI glyph used before (󰋎) is a headset.
@@ -165,6 +178,19 @@ PanelWindow {
                 onMoved: v => {
                     if (root.audioRef)
                         root.audioRef.setSourceVolume(Math.round(v));
+                }
+            }
+
+            // Input device selector — same collapsible list, one for sources.
+            DeviceDropdown {
+                width: content.width - content.leftPadding - content.rightPadding
+                label: "Input device"
+                nodes: root.audioRef ? root.audioRef.sourceNodes : []
+                currentId: root.audioRef ? root.audioRef.defaultSourceId : -1
+                accent: Theme.accentSecondary
+                onSelect: node => {
+                    if (root.audioRef)
+                        root.audioRef.setDefaultSource(node);
                 }
             }
         }
@@ -302,6 +328,210 @@ PanelWindow {
         onValueChanged: {
             if (Math.abs(row.dragValue - row.value) < 2)
                 row.dragValue = -1;
+        }
+    }
+
+    // Collapsible device list: header row shows the active device name and a
+    // chevron; the body expands with its own height animation (the card's
+    // height follows content.implicitHeight, so the popup grows with it).
+    component DeviceDropdown: Column {
+        id: dd
+
+        property string label
+        property var nodes: []
+        property int currentId
+        property color accent
+        property bool expanded: false
+        signal select(var node)
+
+        spacing: 2
+
+        // Header: click anywhere to expand/collapse. Shows the currently
+        // active device name so state stays visible while collapsed.
+        readonly property var currentNode: {
+            for (let i = 0; i < dd.nodes.length; i++) {
+                if (dd.nodes[i].id === dd.currentId)
+                    return dd.nodes[i];
+            }
+            return null;
+        }
+        readonly property string currentNodeName: currentNode ? (currentNode.description || currentNode.nickname || currentNode.name) : "N/A"
+
+        Item {
+            id: header
+
+            width: dd.width
+            height: Theme.popupRowHeight
+
+            Rectangle {
+                anchors.fill: parent
+                radius: Theme.pillRadius
+                color: Theme.highlight
+                opacity: headerArea.containsMouse ? 0.12 : 0.0
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Theme.animFast
+                    }
+                }
+            }
+
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.leftMargin: 8
+                // Section label + active device, muted so the device name reads
+                // as the payload rather than a second title.
+                text: `${dd.label} — ${dd.currentNodeName}`
+                elide: Text.ElideRight
+                width: parent.width - chevron.width - 24
+                font.pixelSize: Theme.fontSize - Theme.popupSectionFontDelta
+                font.family: Theme.fontFamily
+                font.bold: Theme.fontBold
+                color: Theme.textMuted
+            }
+
+            Text {
+                id: chevron
+
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: parent.right
+                anchors.rightMargin: 8
+                text: dd.expanded ? "▾" : "▸"
+                font.pixelSize: Theme.fontSize
+                font.family: Theme.fontFamily
+                color: Theme.textMuted
+            }
+
+            MouseArea {
+                id: headerArea
+
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: dd.expanded = !dd.expanded
+            }
+        }
+
+        // Animated expand: clipping reveals the list instead of tearing it
+        // out of layout (height 0 when collapsed keeps Column spacing sane).
+        Rectangle {
+            id: listClip
+
+            width: dd.width
+            height: dd.expanded ? Math.min(listCol.height, 180) : 0
+            radius: Theme.pillRadius
+            color: Theme.crust
+            border.width: 1
+            border.color: Theme.accent
+            clip: true
+
+            Behavior on height {
+                NumberAnimation {
+                    duration: Theme.animFast
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            Column {
+                id: listCol
+
+                width: parent.width
+                topPadding: 4
+                bottomPadding: 4
+                spacing: 0
+
+                Text {
+                    // Friendly empty state: transient Pipewire churn can
+                    // momentarily produce zero entries.
+                    visible: dd.nodes.length === 0
+                    text: "No devices found"
+                    font.pixelSize: Theme.fontSize - 1
+                    font.family: Theme.fontFamily
+                    font.bold: Theme.fontBold
+                    color: Theme.textMuted
+                    horizontalAlignment: Text.AlignHCenter
+                    width: parent.width
+                }
+
+                Repeater {
+                    model: dd.nodes
+
+                    delegate: DeviceRow {
+                        // Declaring modelData `required` makes the model role a
+                        // real property of the delegate — inline components
+                        // don't reliably receive the context-injected value.
+                        required property var modelData
+                        node: modelData
+                        accent: dd.accent
+                        active: modelData.id === dd.currentId
+                        onSelect: node => dd.select(node)
+                    }
+                }
+            }
+        }
+    }
+
+    // One device row: name (elided) + a check mark for the active device.
+    component DeviceRow: Item {
+        id: row
+
+        required property var node
+        property color accent
+        property bool active
+        signal select(var node)
+
+        readonly property string deviceName: node ? (node.description || node.nickname || node.name) : ""
+
+        width: parent ? parent.width : 0
+        height: Theme.popupRowHeight - 6
+
+        Rectangle {
+            anchors.fill: parent
+            radius: Theme.pillRadius
+            color: Theme.highlight
+            opacity: rowArea.containsMouse ? 0.18 : 0.0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Theme.animFast
+                }
+            }
+        }
+
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 8
+            anchors.right: check.left
+            anchors.rightMargin: 8
+            text: row.deviceName
+            elide: Text.ElideRight
+            font.pixelSize: Theme.fontSize - 1
+            font.family: Theme.fontFamily
+            font.bold: Theme.fontBold
+            color: row.active ? row.accent : Theme.text
+        }
+
+        Text {
+            id: check
+
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            anchors.rightMargin: 8
+            visible: row.active
+            text: "✓"
+            font.pixelSize: Theme.fontSize
+            font.family: Theme.fontFamily
+            font.bold: Theme.fontBold
+            color: row.accent
+        }
+
+        MouseArea {
+            id: rowArea
+
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: row.select(row.node)
         }
     }
 }
