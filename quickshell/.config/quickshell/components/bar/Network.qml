@@ -10,6 +10,7 @@ Pill {
 
     property bool connected: false
     property real wifiSignal: 0.0
+    property string wifiName: ""
     property var watched: ({})
 
     function watchDevice(d) {
@@ -41,6 +42,7 @@ Pill {
         const devices = Networking.devices.values;
         let isWifiConnected = false;
         let signal = 0.0;
+        let name = "";
 
         for (let i = 0; i < devices.length; i++) {
             const d = devices[i];
@@ -62,6 +64,7 @@ Pill {
                 isWifiConnected = true;
 
                 signal = net.signalStrength;
+                name = net.name;
 
                 break;
             }
@@ -69,6 +72,7 @@ Pill {
 
         connected = isWifiConnected;
         wifiSignal = signal;
+        wifiName = name;
     }
 
     function networkLabel(): string {
@@ -102,5 +106,23 @@ Pill {
         font.bold: Theme.fontBold
         color: Theme.yellow
         text: root.networkLabel()
+    }
+
+    // Hover target for the WiFi hint; hover-only, so clicks stay click-through
+    // on this pill (no click behavior defined here).
+    MouseArea {
+        id: hoverArea
+
+        anchors.fill: parent
+        hoverEnabled: true
+        acceptedButtons: Qt.NoButton
+    }
+
+    // Network name (SSID) shown below the pill while hovered.
+    HoverHint {
+        target: root
+        text: hoverArea.containsMouse
+            ? (root.connected ? root.wifiName : "Wi-Fi") : ""
+        accent: Theme.yellow
     }
 }
