@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
+import QtQuick.Controls
 import "../../theme"
 
 // Audio popup: output (sink) + microphone (source) sliders, opened by
@@ -213,7 +214,8 @@ PanelWindow {
         signal moved(real newValue)
 
         // While dragging, keep the visual in sync even if the reactive
-        // sinkVolume briefly lags behind the pointer.
+        // volume briefly lags behind the pointer (Slider owns its value
+        // while pressed; the Binding hands control back when released).
         property real dragValue: -1
         readonly property real shownValue: row.dragValue >= 0 ? row.dragValue : row.value
 
@@ -236,9 +238,12 @@ PanelWindow {
             }
         }
 
-        // Track + handle drawn at full width; usable region sits between the
-        // icon and the percent label.
-        Item {
+        // Native Slider (QtQuick.Controls) restyled with the popup visuals:
+        // background = track + fill, handle = draggable knob. Replaces the
+        // hand-rolled MouseArea/knob math; Slider owns pressed state, drag
+        // handling and availableWidth centering. External value updates
+        // (reactive volume) reach the slider only while it is not pressed.
+        Slider {
             id: trackWrap
 
             anchors.verticalCenter: parent.verticalCenter
@@ -248,66 +253,75 @@ PanelWindow {
             anchors.rightMargin: 8
             height: Theme.popupTrackHeight
 
-            // Usable knob travel: knob center goes 0 → width - knob.
+            from: 0
+            to: 100
+            snapMode: Slider.NoSnap
+
+            onMoved: row.moved(value)
+            onPressedChanged: {
+                if (!pressed) {
+                    row.dragValue = -1;
+                    row.moved(value);
+                }
+            }
+
+            Binding {
+                target: trackWrap
+                property: "value"
+                value: row.shownValue
+                when: !trackWrap.pressed
+                restoreMode: Binding.RestoreNone
+            }
+            // While pressed the reactive volume may lag a notch; keep the
+            // label honest with the slider's own value.
+            Binding {
+                target: row
+                property: "dragValue"
+                value: trackWrap.value
+                when: trackWrap.pressed
+                restoreMode: Binding.RestoreNone
+            }
+
+            background: Item {
+                implicitWidth: trackWrap.width
+                implicitHeight: trackWrap.height
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: height / 2
+                    color: Theme.crust
+                    border.width: 1
+                    border.color: row.accent
+                    opacity: 0.85
+                }
+
+                // Filled portion of the track, up to the knob center.
+                Rectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: parent.height - 2
+                    x: 1
+                    width: Math.max(
+                        2,
+                        1 + (trackWrap.availableWidth * trackWrap.visualPosition) + trackWrap.height / 2
+                    )
+                    radius: height / 2
+                    color: row.accent
+                    visible: !row.muted
+                    opacity: 0.9
+                }
+            }
+
             // Knob runs slightly larger than the track so it reads as a
-            // draggable handle rather than a track endpoint.
-            readonly property real knobSize: height + 6
-            readonly property real usable: width - knobSize
-
-            Rectangle {
-                id: track
-
-                anchors.fill: parent
-                radius: height / 2
-                color: Theme.crust
-                border.width: 1
-                border.color: row.accent
-                opacity: 0.85
-            }
-
-            // Filled portion of the track, up to the knob center.
-            Rectangle {
-                anchors.verticalCenter: parent.verticalCenter
-                height: parent.height - 2
-                x: 1
-                width: Math.max(2, 1 + (trackWrap.usable * row.shownValue / 100) + trackWrap.height / 2)
-                radius: height / 2
-                color: row.accent
-                visible: !row.muted
-                opacity: 0.9
-            }
-
-            // Handle knob, vertically centered on the track.
-            Rectangle {
-                id: knob
-
-                x: trackWrap.usable * row.shownValue / 100
-                y: (trackWrap.height - width) / 2
-                width: trackWrap.knobSize
-                height: trackWrap.knobSize
+            // draggable handle rather than a track endpoint. The Slider does
+            // not position an overridden handle item; do it here the same way
+            // the Basic style template does.
+            handle: Rectangle {
+                x: trackWrap.visualPosition * (trackWrap.availableWidth - width)
+                y: (trackWrap.height - height) / 2
+                width: trackWrap.height + 6
+                height: width
                 radius: width / 2
                 color: row.muted ? Theme.textMuted : row.accent
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                anchors.margins: -6
-                cursorShape: Qt.PointingHandCursor
-                onPressed: mouse => trackWrap.setValueFrom(mouse.x)
-                onPositionChanged: mouse => {
-                    if (pressed)
-                        trackWrap.setValueFrom(mouse.x);
-                }
-                // Drop the drag override once the pointer lets go; the
-                // reactive binding takes over again.
-                onReleased: row.dragValue = -1
-                onCanceled: row.dragValue = -1
-            }
-
-            function setValueFrom(mouseX: real): void {
-                const v = Math.max(0, Math.min(100, ((mouseX - trackWrap.knobSize / 2) / trackWrap.usable) * 100));
-                row.dragValue = v;
-                row.moved(v);
             }
         }
 
