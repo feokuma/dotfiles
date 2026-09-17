@@ -62,7 +62,9 @@ ShellRoot {
             }
 
             Bluetooth {
+                id: bluetooth
                 Layout.preferredWidth: width
+                popup: bluetoothPopup
             }
 
             Audio {
@@ -77,6 +79,10 @@ ShellRoot {
     AudioPopup {
         id: audioPopup
         audioRef: audio
+    }
+
+    BluetoothPopup {
+        id: bluetoothPopup
     }
 
     Launcher {

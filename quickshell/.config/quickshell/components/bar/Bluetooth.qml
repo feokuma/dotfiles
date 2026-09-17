@@ -13,6 +13,10 @@ Pill {
     property int deviceCount: 0
     property var watched: ({})
 
+    // Popup attached by shell.qml; clicks toggle it instead of flipping the
+    // adapter power (power now lives on the popup's own toggle).
+    property var popup: null
+
     width: btText.implicitWidth + Theme.pillPaddingH
 
     function refresh() {
@@ -74,6 +78,10 @@ Pill {
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton
         onClicked: {
+            if (root.popup) {
+                root.popup.toggle();
+                return;
+            }
             if (root.adapter)
                 root.adapter.enabled = !root.enabled;
         }
