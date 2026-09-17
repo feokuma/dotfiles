@@ -30,8 +30,35 @@ PopupWindow {
     property real paddingHorizontal: 10
     property real paddingVertical: 4
 
+    // Desired visibility derived purely from the public API, so consumers keep
+    // just setting `text`. The animated `shown` state lags behind this on the
+    // way out (see below), decoupling "should be visible" from "window is up".
+    readonly property bool wantVisible: root.text.length > 0 && !!root.target
+
+    // Mapped-window state. Snaps on for entrance, held briefly on exit (see
+    // holdTimer) so the fade-out is visible before the window truly hides.
+    property bool shown: false
+
+    // During the exit fade `text` is already empty, which would render an
+    // empty bubble; keep the last non-empty string for the label so it fades
+    // out with content. Reset only when fully hidden. Done imperatively on
+    // purpose: a self-referencing binding reads as a QML binding loop and Qt
+    // may break it, leaving lastText empty exactly when it is needed.
+    property string lastText: ""
+    onTextChanged: if (text.length > 0) lastText = text
+    onShownChanged: if (!shown) lastText = ""
+
+    // Entrance/exit timing, referenced by both the state transitions and the
+    // exit-hold timer so they stay in lockstep. Fast matches the popups' motif.
+    readonly property int enterDuration: Theme.animFast
+    readonly property int exitDuration: Theme.animFast
+
     color: "transparent"
-    visible: root.text.length > 0 && root.target
+
+    // The window is mapped only while `shown` is true; `shown` survives the
+    // fade-out window so the bubble animates, then the hold timer clears it,
+    // guaranteeing no lingering (even if click-through) surface stays mapped.
+    visible: root.shown
 
     // Fully click-through: an empty mask Region means this window never
     // takes input (same trick as the popups' overlay catcher inverse).
@@ -52,6 +79,29 @@ PopupWindow {
     implicitWidth: bubble.implicitWidth + 24
     implicitHeight: bubble.implicitHeight + 14
 
+    onWantVisibleChanged: {
+        if (wantVisible) {
+            // Re-entering during an in-flight exit: cancel the hide and let the
+            // entrance transition reverse from wherever the fade-out reached.
+            holdTimer.stop();
+            root.shown = true;
+        } else if (root.shown) {
+            // Keep the window alive just past the fade so the final frames
+            // actually render; the extra stretch is transparent + click-through
+            // (empty mask), so it is harmless.
+            holdTimer.restart();
+        }
+    }
+
+    Timer {
+        id: holdTimer
+
+        // Slightly longer than the exit transition to avoid clipping its last
+        // frame; the padding is invisible (opacity already 0 by then).
+        interval: root.exitDuration + 40
+        onTriggered: root.shown = false
+    }
+
     Rectangle {
         id: bubble
 
@@ -64,11 +114,76 @@ PopupWindow {
         border.width: 1
         border.color: root.accent
 
+        // Base (shown) look; the "faded" state below overrides it.
+        opacity: 1
+        scale: 1
+
+        states: State {
+            name: "faded"
+
+            // Driven by intent (wantVisible), not window visibility, so the
+            // exit animation runs while the window is still mapped by `shown`.
+            when: !root.wantVisible
+
+            // Fade + a gentle shrink toward the anchored item reads as the
+            // bubble "retreating" back into the bar rather than blinking off.
+            PropertyChanges {
+                target: bubble
+                opacity: 0
+                scale: 0.92
+            }
+        }
+
+        // Direction-specific easing: one Transition per edge of the "faded"
+        // state, since a plain Behavior can't differ between in and out.
+        transitions: [
+            Transition {
+                from: "faded"
+                to: "*"
+
+                // Entrance: quick, decelerating pop-in.
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: bubble
+                        property: "opacity"
+                        duration: root.enterDuration
+                        easing.type: Easing.OutCubic
+                    }
+                    NumberAnimation {
+                        target: bubble
+                        property: "scale"
+                        duration: root.enterDuration
+                        easing.type: Easing.OutCubic
+                    }
+                }
+            },
+            Transition {
+                to: "faded"
+
+                // Exit: ease-in so it lingers a beat, then leaves; matches the
+                // holdTimer interval above.
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: bubble
+                        property: "opacity"
+                        duration: root.exitDuration
+                        easing.type: Easing.InCubic
+                    }
+                    NumberAnimation {
+                        target: bubble
+                        property: "scale"
+                        duration: root.exitDuration
+                        easing.type: Easing.InCubic
+                    }
+                }
+            }
+        ]
+
         Text {
             id: label
 
             anchors.centerIn: parent
-            text: root.text
+            text: root.text.length > 0 ? root.text : root.lastText
             font.pixelSize: Theme.fontSize - 1
             font.family: Theme.fontFamily
             font.bold: Theme.fontBold
