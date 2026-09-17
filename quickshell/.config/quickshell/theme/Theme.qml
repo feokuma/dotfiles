@@ -57,6 +57,8 @@ QtObject {
 
     // Animation durations
     readonly property int animFast: 150
+    // Softer, more deliberate transitions (switches, state changes).
+    readonly property int animSlow: 250
 
     // Audio popup
     readonly property int popupTrackHeight: 10

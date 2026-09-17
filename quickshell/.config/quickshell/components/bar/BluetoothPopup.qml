@@ -4,6 +4,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Widgets
 import QtQuick
+import QtQuick.Controls
 import "../../theme"
 
 // Bluetooth popup: adapter power toggle, scan (discovery) toggle, paired
@@ -225,31 +226,82 @@ PanelWindow {
                     color: Theme.textMuted
                 }
 
-                // Adapter power: writing `enabled` turns the radio on/off;
-                // the binding re-reads it via enabledChanged. While the
-                // adapter settles (Enabling/Disabling) show a muted state.
-                TogglePill {
-                    id: powerToggle
-
+                // Adapter power: native Switch (QtQuick.Controls). The
+                // conditional Binding mirrors VolumeSlider's drag pattern:
+                // the user write owns `checked` while pressed, then control
+                // hands back to the reactive adapter state. Disabled while
+                // the adapter settles (Enabling/Disabling); the transition
+                // hint text lives to the left of the switch.
+                Row {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.right: parent.right
-                    label: {
-                        if (!root.adapter)
-                            return "\u2014";
-                        if (root.adapter.state === BluetoothAdapterState.Enabling)
-                            return "Turning on";
-                        if (root.adapter.state === BluetoothAdapterState.Disabling)
-                            return "Turning off";
-                        return root.adapter.enabled ? "On" : "Off";
-                    }
-                    active: root.adapter ? root.adapter.enabled : false
-                    busy: root.adapter
-                          ? (root.adapter.state === BluetoothAdapterState.Enabling
-                             || root.adapter.state === BluetoothAdapterState.Disabling)
-                          : false
-                    onActivated: {
-                        if (root.adapter)
-                            root.adapter.enabled = !root.adapter.enabled;
+                    height: Theme.popupRowHeight
+                    spacing: 10
+
+                    Switch {
+                        id: powerSwitch
+
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        readonly property bool adapterBusy: root.adapter
+                            && (root.adapter.state === BluetoothAdapterState.Enabling
+                                || root.adapter.state === BluetoothAdapterState.Disabling)
+
+                        enabled: root.adapter && !adapterBusy
+                        onToggled: {
+                            if (root.adapter)
+                                root.adapter.enabled = checked;
+                        }
+
+                        Binding {
+                            target: powerSwitch
+                            property: "checked"
+                            value: root.adapter ? root.adapter.enabled : false
+                            when: !powerSwitch.pressed && !powerSwitch.adapterBusy
+                            restoreMode: Binding.RestoreNone
+                        }
+
+                        indicator: Rectangle {
+                            implicitWidth: 34
+                            implicitHeight: 20
+                            radius: height / 2
+                            color: powerSwitch.adapterBusy ? Theme.textMuted
+                                 : powerSwitch.checked ? Theme.accent
+                                 : Theme.crust
+                            border.width: 1
+                            border.color: powerSwitch.checked ? Theme.accent : Theme.textMuted
+                            opacity: powerSwitch.enabled ? 1.0 : 0.5
+
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Theme.animSlow
+                                }
+                            }
+                            Behavior on border.color {
+                                ColorAnimation {
+                                    duration: Theme.animSlow
+                                }
+                            }
+
+                            // Knob positioned by the switch's own visual
+                            // position, like the Slider handle in AudioPopup;
+                            // Behavior on x softens the on/off travel.
+                            Rectangle {
+                                x: 2 + powerSwitch.visualPosition * (parent.width - width - 4)
+                                width: parent.height - 4
+                                height: width
+                                radius: width / 2
+                                anchors.verticalCenter: parent.verticalCenter
+                                color: Theme.text
+
+                                Behavior on x {
+                                    NumberAnimation {
+                                        duration: Theme.animSlow
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
