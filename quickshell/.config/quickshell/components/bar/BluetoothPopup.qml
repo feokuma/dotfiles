@@ -69,22 +69,6 @@ PanelWindow {
         onPressed: root.close()
     }
 
-    // Reactive sync fallback. Quickshell 0.3.1 declares notify signals for
-    // BluetoothDevice (connectedChanged, stateChanged, …) but never emits them
-    // at runtime, so QML bindings freeze on the value seen at delegate
-    // creation — the popup believed a disconnected headset was still
-    // connected. Until signals work (or quickshell is updated), nudge all
-    // device-state bindings once per second while the popup is open. The
-    // timer only runs while isOpen, so closed state costs nothing.
-    property int deviceStateTick: 0
-    Timer {
-        interval: 1000
-        running: root.isOpen
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: root.deviceStateTick++
-    }
-
     // "Any paired" recomputed on demand: touching .values creates a
     // dependency on the model's valuesChanged signal (device add/remove).
     readonly property bool hasAnyPaired: {
@@ -97,10 +81,6 @@ PanelWindow {
         }
         return false;
     }
-
-    // Referenced by device-state bindings below so the sync ticker forces
-    // their re-evaluation (see note on deviceStateTick).
-    readonly property bool stateBindingTrigger: deviceStateTick >= 0
 
     // --- Centralized icon mapping -------------------------------------------------
     // BlueZ exposes each device's type as a freedesktop icon name via
@@ -417,15 +397,15 @@ PanelWindow {
 
         // Row is interactive only while a device is bound and the connection
         // is not mid-transition.
-        readonly property bool busy: root.stateBindingTrigger && device
+        readonly property bool busy: device
                                  && (device.state === BluetoothDeviceState.Connecting
                                      || device.state === BluetoothDeviceState.Disconnecting
                                      || device.pairing)
 
-        // stateBindingTrigger keeps these bindings live despite missing
-        // notify signals from the bluetooth service (see root.deviceStateTick).
-        readonly property bool connected: root.stateBindingTrigger
-                                          && (device ? device.connected : false)
+        // State binds straight to the device object: notify signals are
+        // wired via Q_OBJECT_BINDABLE_PROPERTY on Quickshell.Bluetooth
+        // (validated empirically on 0.3.1 with a live connect/disconnect).
+        readonly property bool connected: device ? device.connected : false
 
         // Display name: prefer the friendly deviceName; fall back to MAC so
         // unnamed peripherals are still selectable.
