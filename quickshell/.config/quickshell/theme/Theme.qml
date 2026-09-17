@@ -60,4 +60,16 @@ QtObject {
 
     // Audio popup
     readonly property int popupTrackHeight: 10
+
+    // Popups (shared geometry for the bar-anchored overlay cards: audio,
+    // bluetooth, ...). Centralized so the card look stays identical and a
+    // single change rethemes every popup.
+    readonly property int popupWidth: 350
+    readonly property int popupPadding: 14
+    // Vertical gap between the bar's bottom edge and the popup card.
+    readonly property int popupBarGap: 6
+    // Row height for the device/toggle rows inside popups.
+    readonly property int popupRowHeight: 40
+    // Section header (muted label) size offset relative to Theme.fontSize.
+    readonly property int popupSectionFontDelta: 0
 }
