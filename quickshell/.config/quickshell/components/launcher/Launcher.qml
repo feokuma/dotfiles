@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Widgets
 import QtQuick
+import QtQuick.Controls
 import "../../theme"
 
 // Application launcher overlay, macOS Spotlight-like look:
@@ -58,7 +59,7 @@ PanelWindow {
 
     function open() {
         root.search = "";
-        searchInput.clear();
+        searchInput.text = "";
         root.selectedIndex = 0;
         root.isOpen = true;
     }
@@ -66,7 +67,7 @@ PanelWindow {
     function close() {
         root.isOpen = false;
         root.search = "";
-        searchInput.clear();
+        searchInput.text = "";
     }
 
     function toggle() {
@@ -227,33 +228,31 @@ PanelWindow {
                         font.bold: Theme.fontBold
                     }
 
-                    TextInput {
+                    // Native TextField (QtQuick.Controls): owns the placeholder
+                    // rendering and text selection; background: null keeps the
+                    // panel's own visuals. Keys.onReturn/Enter are TextInput-
+                    // level signals; placeholderTextColor exists on TextField.
+                    TextField {
                         id: searchInput
 
                         width: parent.width - searchIcon.width - parent.spacing
                         anchors.verticalCenter: parent.verticalCenter
+                        background: null
                         color: Theme.text
                         font.family: Theme.fontFamily
                         font.pixelSize: root.fontSize
                         font.bold: Theme.fontBold
                         cursorVisible: root.isOpen
                         clip: true
+                        selectByMouse: true
+                        placeholderText: "Search applications..."
+                        placeholderTextColor: Theme.textMuted
                         onTextChanged: root.search = text
                         Keys.onEscapePressed: root.close()
                         Keys.onEnterPressed: root.launch(root.selectedIndex)
                         Keys.onReturnPressed: root.launch(root.selectedIndex)
                         Keys.onDownPressed: root.selectNext()
                         Keys.onUpPressed: root.selectPrevious()
-
-                        Text {
-                            visible: searchInput.text === ""
-                            text: "Search applications..."
-                            anchors.verticalCenter: parent.verticalCenter
-                            color: Theme.textMuted
-                            font.family: Theme.fontFamily
-                            font.pixelSize: root.fontSize
-                            font.bold: Theme.fontBold
-                        }
                     }
                 }
             }
