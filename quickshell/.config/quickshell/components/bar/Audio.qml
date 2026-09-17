@@ -92,17 +92,21 @@ Pill {
         ? (source.description || source.nickname || source.name || "")
         : "N/A"
 
-    // Native default-switching only. The BlueZ/wpctl detour stays limited to
-    // per-node volume writes above; preferredDefault* is the compositor-level
-    // "which device do I want" mechanism and works the same for BlueZ nodes.
+    // Default-device switching goes through wpctl: quickshell (0.3.1) writes
+    // the WirePlumber-0.4 metadata keys (`default.configured.audio.*`), which
+    // WirePlumber 0.5+ ignores, so the native `Pipewire.preferredDefault*`
+    // writes are a silent no-op on this setup. `wpctl set-default` writes the
+    // 0.5 keys and state correctly. BlueZ devices need the wpctl path for
+    // volume/mute anyway; for the default switch the same command covers
+    // regular and BlueZ nodes uniformly.
     function setDefaultSink(node): void {
         if (node)
-            Pipewire.preferredDefaultAudioSink = node;
+            Quickshell.execDetached(["wpctl", "set-default", String(node.id)]);
     }
 
     function setDefaultSource(node): void {
         if (node)
-            Pipewire.preferredDefaultAudioSource = node;
+            Quickshell.execDetached(["wpctl", "set-default", String(node.id)]);
     }
 
     // Popup attached by shell.qml; clicks toggle it instead of muting.
