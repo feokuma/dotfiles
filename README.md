@@ -63,7 +63,12 @@ cada arquivo cuida de uma parte: `monitors`, `input`, `environment`,
 - Zsh, Starship
 - Plugins do Zsh: `zsh-autosuggestions`, `zsh-syntax-highlighting`
 - `eza` (aliases de `ls` no `.zshrc`)
+- Numeros (opção): `wpctl` (PipeWire) e `brightnessctl` (teclas de mídia no Hyprland)
 - `wpctl` (PipeWire) e `brightnessctl` (teclas de mídia no Hyprland)
+- **`power-profiles-daemon`** — perfis de energia (`performance`, `balanced`,
+  `power-saver`) usados pelo componente de bateria da barra Quickshell: a
+  barra lê/troca o perfil via `busctl` (D-Bus do daemon), sem CLI adicional.
+  Ativar com: `sudo systemctl enable --now power-profiles-daemon`
 - **`gnome-themes-extra`** — fornece o tema `Adwaita-dark` usado pelo
   GTK3 (incl. `xdg-desktop-portal-gtk`, responsável pelos diálogos de
   arquivo do Chrome/Chrome-based apps). Sem este pacote, o GTK não
