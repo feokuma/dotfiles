@@ -5,6 +5,13 @@ compinit
 export EDITOR="nvim"
 export VISUAL="nvim"
 
+# Go
+export GOPATH="$HOME/go"
+export PATH="$GOPATH/bin:$PATH"
+# Conveniência para o projeto rn-toolchain
+alias gotest="./go test ./..."
+alias gotestv="./go test -v ./..."
+
 # yazi: change shell cwd on exit (open with `yy`; required because yazi runs
 # as a child process and cannot move the parent shell itself)
 yy() {
@@ -36,6 +43,23 @@ eval "$(fzf --zsh)"
 
 # Syntax highlighting (must stay last)
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# Launch VS Code detached so it doesn't flood or hold the terminal
+# (unalias first: re-sourcing the file with an old `alias code` loaded is a parse error)
+# Resolve relative paths before passing: the wrapper cd's to its app dir exec,
+# which would break `code .` and other relative paths.
+unalias code 2>/dev/null
+code() {
+	local -a abs
+	local arg
+	for arg in "$@"; do
+		case "$arg" in
+			-*|[a-z]*:*) abs+=("$arg") ;; # flags and URI schemes stay as-is
+			*) abs+=("${arg:A}") ;;        # resolve to absolute path
+		esac
+	done
+	setsid -f visual-studio-code-electron "${abs[@]}" >/dev/null 2>&1 </dev/null
+}
 
 alias ls='eza'
 alias la='eza -la'
