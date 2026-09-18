@@ -75,6 +75,11 @@ cada arquivo cuida de uma parte: `monitors`, `input`, `environment`,
   encontra `Adwaita-dark` e cai no tema claro padrão, mesmo com
   `prefer-dark` no gsettings
 - `stow` (para instalar os pacotes)
+- **VS Code**: instalar `visual-studio-code-electron-bin` (AUR, via `yay`).
+  Usa o Electron do sistema (`electron42`) em vez do Chromium empacotado
+  da Microsoft, o que facilita aplicar o workaround da cedilha (ç)
+  com o `.XCompose` deste repositório — abrimos via `code .`, com o app
+  lançado detached pelo alias `code` do zsh.
 
 ## Instalação
 
