@@ -1,0 +1,2 @@
+singleton PopupManager 1.0 PopupManager.qml
+ScrollHandler 1.0 ScrollHandler.qml
