@@ -31,13 +31,22 @@ Pill {
                 required property var modelData
 
                 readonly property bool isFocused: modelData.focused ?? false
+                // Workspace urgency: a client on this workspace requested
+                // attention (e.g. tab opened, DM received). Cleared on focus.
+                readonly property bool isUrgent: modelData.urgent ?? false
 
                 width: label.width + focusMarkWidth
                 // Inner highlight keeps one vertical padding of breathing
                 // room inside the fixed pill (38 - 8 = 30).
                 height: Theme.pillHeight - Theme.pillPaddingV
                 radius: Theme.pillRadius
-                color: delegateRoot.isFocused ? Theme.highlight : "transparent"
+                color: {
+                    if (delegateRoot.isUrgent)
+                        return Theme.success;
+                    if (delegateRoot.isFocused)
+                        return Theme.highlight;
+                    return "transparent";
+                }
 
                 Text {
                     id: label
@@ -47,7 +56,7 @@ Pill {
                     font.pixelSize: Theme.fontSize
                     font.family: Theme.fontFamily
                     font.bold: Theme.fontBold
-                    color: delegateRoot.isFocused ? Theme.crust : Theme.text
+                    color: delegateRoot.isFocused || delegateRoot.isUrgent ? Theme.crust : Theme.text
                 }
 
                 MouseArea {
