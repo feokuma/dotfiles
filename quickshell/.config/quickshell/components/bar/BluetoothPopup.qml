@@ -6,6 +6,7 @@ import Quickshell.Widgets
 import QtQuick
 import QtQuick.Controls
 import "../../theme"
+import "../../widgets"
 
 // Bluetooth popup: adapter power toggle, scan (discovery) toggle, paired
 // device list and discovered devices while scanning. Opened by clicking the
@@ -343,11 +344,14 @@ PanelWindow {
                     color: Theme.text
                 }
 
-                TogglePill {
+                // Shared themed button (same widget as NetworkPopup's
+                // Scan/Connect buttons); the popup row is 40px, so the
+                // default 36px button height fits.
+                TextButton {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.right: parent.right
-                    label: "Open bluetoothctl"
-                    onActivated: ghosttyProc.running = true;
+                    text: "Open bluetoothctl"
+                    onClicked: ghosttyProc.running = true;
                 }
             }
 
@@ -378,52 +382,6 @@ PanelWindow {
                 font.bold: Theme.fontBold
                 color: Theme.textMuted
             }
-        }
-    }
-
-    // Compact pill button used for the two adapter toggles (power / scan).
-    // Local to this popup; a generic button only earns a widgets/ file once a
-    // second consumer appears.
-    component TogglePill: Rectangle {
-        id: pill
-
-        property string label
-        property bool active: false
-        property bool busy: false
-        signal activated
-
-        readonly property int hPad: 12
-
-        implicitHeight: 26
-        width: pillText.implicitWidth + hPad * 2
-        radius: height / 2
-        color: Theme.crust
-        border.width: 1
-        border.color: active ? Theme.accent : Theme.textMuted
-        opacity: enabled ? 1.0 : 0.5
-
-        Behavior on border.color {
-            NumberAnimation {
-                duration: Theme.animFast
-            }
-        }
-
-        Text {
-            id: pillText
-
-            anchors.centerIn: parent
-            text: pill.label
-            font.pixelSize: Theme.fontSize - 1
-            font.family: Theme.fontFamily
-            font.bold: Theme.fontBold
-            color: pill.active ? Theme.accent : Theme.text
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            enabled: pill.enabled
-            cursorShape: Qt.PointingHandCursor
-            onClicked: pill.activated()
         }
     }
 
