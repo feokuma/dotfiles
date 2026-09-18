@@ -1,6 +1,21 @@
 autoload -Uz compinit
 compinit
 
+# Default editor (used by yazi, git, fzf, etc.)
+export EDITOR="nvim"
+export VISUAL="nvim"
+
+# yazi: change shell cwd on exit (open with `yy`; required because yazi runs
+# as a child process and cannot move the parent shell itself)
+yy() {
+    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+        builtin cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+}
+
 # Prompt
 eval "$(starship init zsh)"
 
