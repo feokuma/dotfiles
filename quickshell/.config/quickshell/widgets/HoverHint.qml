@@ -45,8 +45,10 @@ PopupWindow {
     // purpose: a self-referencing binding reads as a QML binding loop and Qt
     // may break it, leaving lastText empty exactly when it is needed.
     property string lastText: ""
-    onTextChanged: if (text.length > 0) lastText = text
-    onShownChanged: if (!shown) lastText = ""
+    onTextChanged: if (text.length > 0)
+        lastText = text
+    onShownChanged: if (!shown)
+        lastText = ""
 
     // Entrance/exit timing, referenced by both the state transitions and the
     // exit-hold timer so they stay in lockstep. Fast matches the popups' motif.
@@ -106,10 +108,10 @@ PopupWindow {
         id: bubble
 
         implicitWidth: label.implicitWidth + root.paddingHorizontal * 2
-        implicitHeight: label.implicitHeight + root.paddingVertical * 2
+        implicitHeight: label.implicitHeight + root.paddingVertical * 4
 
         anchors.centerIn: parent
-        radius: height / 2
+        radius: Theme.pillRadius //height / 2
         color: Theme.crust
         border.width: 1
         border.color: root.accent
