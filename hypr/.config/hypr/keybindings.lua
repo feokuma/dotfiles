@@ -14,8 +14,31 @@ hl.bind(mainMod .. " + B", hl.dsp.exec_raw("firefox"))
 hl.bind("ALT + Space", hl.dsp.exec_raw("qs ipc call launcher toggleLauncher"))
 
 hl.bind("ALT + F4", hl.dsp.window.close())
+-- Float to fullscreen: SUPER+F toggles floating, F11 toggles fullscreen.
+-- SUPER+V is kept as a float alias.
+-- SUPER+F floats the window resized to 60% of the active monitor and
+-- centered; pressing again tiles it (round off to avoid fractional pixels).
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ action = "toggle" }))
+hl.bind(mainMod .. " + F", function()
+	local w = hl.get_active_window()
+	if not w then
+		return
+	end
+	if w.floating then
+		hl.dispatch(hl.dsp.window.float({ action = "toggle" }))
+		return
+	end
+	hl.dispatch(hl.dsp.window.float({ action = "set" }))
+	-- size/center effects are not dynamic: when a tiled window floats they
+	-- are not re-applied, so this bind does it explicitly. Monitor values
+	-- are physical pixels, so divide by scale to get logical ones.
+	local m = hl.get_active_monitor()
+	local wpx = math.floor((m.width / m.scale) * 0.6 + 0.5)
+	local hpx = math.floor((m.height / m.scale) * 0.6 + 0.5)
+	hl.dispatch(hl.dsp.window.resize({ x = wpx, y = hpx, relative = false }))
+	hl.dispatch(hl.dsp.window.center())
+end)
+hl.bind("F11", hl.dsp.window.fullscreen({ action = "toggle" }))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit")) -- dwindle only
 
