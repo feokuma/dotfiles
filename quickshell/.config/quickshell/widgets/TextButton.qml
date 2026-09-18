@@ -33,7 +33,10 @@ Button {
         opacity: control.enabled ? 1.0 : 0.5
 
         Behavior on border.color {
-            NumberAnimation {
+            // ColorAnimation, not NumberAnimation: NumberAnimation is numeric
+            // and writes invalid intermediate values into the color, leaving
+            // the border blank (and the Behavior stuck).
+            ColorAnimation {
                 duration: Theme.animFast
             }
         }
