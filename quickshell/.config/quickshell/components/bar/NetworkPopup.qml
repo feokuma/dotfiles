@@ -525,7 +525,12 @@ PanelWindow {
             if (!row.network || pskInput.text.length === 0)
                 return;
             row.errorText = "";
-            row.network.connectWithPsk(pskInput.text);
+            // Read the password first: the field is cleared and the prompt
+            // collapsed immediately, while NM negotiates in the background.
+            const psk = pskInput.text;
+            root.expandedRow = null;
+            pskInput.clear();
+            row.network.connectWithPsk(psk);
         }
 
         // Wire the failure signal to the inline error. connectionFailed()
