@@ -21,23 +21,10 @@ import "../../widgets"
 // with a rounded card anchored to the bar's right side, a click-outside
 // catcher, and a fade+slide entrance. Per-monitor hosts stay deferred until
 // a multi-monitor strategy exists (same as the other popups).
-PanelWindow {
+PopupBase {
     id: root
 
-    property bool isOpen: false
     readonly property var adapter: Bluetooth.defaultAdapter
-
-    function open() {
-        root.isOpen = true;
-    }
-
-    function close() {
-        root.isOpen = false;
-    }
-
-    function toggle() {
-        root.isOpen ? root.close() : root.open();
-    }
 
     // Launch ghostty with bluetoothctl for pairing. setsid detaches ghostty
     // into its own session so a shell reload/restart never kills the pair
@@ -50,16 +37,6 @@ PanelWindow {
 
     visible: root.isOpen
     color: "transparent"
-    // Fullscreen invisible window catches every click (closes the popup)
-    // while the card consumes clicks inside it. No HyprlandFocusGrab: the
-    // compositor re-evaluating focus used to close popups mid-interaction.
-    exclusiveZone: -1
-    anchors {
-        top: true
-        left: true
-        right: true
-        bottom: true
-    }
     margins.top: Theme.barHeight + Theme.popupBarGap
 
     WlrLayershell.layer: WlrLayer.Overlay

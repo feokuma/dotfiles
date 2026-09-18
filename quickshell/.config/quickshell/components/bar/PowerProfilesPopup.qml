@@ -3,6 +3,7 @@ import Quickshell.Wayland
 import QtQuick
 import "../../services"
 import "../../theme"
+import "../../widgets"
 
 // Power-profiles popup: lists the profiles exposed by power-profiles-daemon
 // and lets the user switch the active one. Opened by clicking the Battery
@@ -10,35 +11,11 @@ import "../../theme"
 // under the hood), so nothing here talks to D-Bus directly.
 // Visual pattern mirrors AudioPopup (fullscreen invisible overlay card +
 // collapsible dropdown).
-PanelWindow {
+PopupBase {
     id: root
-
-    property bool isOpen: false
-
-    function open() {
-        root.isOpen = true;
-    }
-
-    function close() {
-        root.isOpen = false;
-    }
-
-    function toggle() {
-        root.isOpen ? root.close() : root.open();
-    }
 
     visible: root.isOpen
     color: "transparent"
-    // Fullscreen invisible window catches every click (closes the popup) while
-    // the card consumes clicks inside it. No HyprlandFocusGrab: the compositor
-    // re-evaluating focus used to close popups mid-interaction.
-    exclusiveZone: -1
-    anchors {
-        top: true
-        left: true
-        right: true
-        bottom: true
-    }
     margins.top: Theme.barHeight + Theme.popupBarGap
 
     WlrLayershell.layer: WlrLayer.Overlay

@@ -24,10 +24,8 @@ import "../../widgets"
 // overlay with a rounded card anchored to the bar's right side, a
 // click-outside catcher, and a fade+slide entrance. Per-monitor hosts stay
 // deferred until a multi-monitor strategy exists (same as the other popups).
-PanelWindow {
+PopupBase {
     id: root
-
-    property bool isOpen: false
 
     // The wifi device, re-derived from the live device model (never cached:
     // NM recreates device objects after suspend/resume, so a stale reference
@@ -45,31 +43,11 @@ PanelWindow {
     // popup root so opening one row collapses the others.
     property var expandedRow: null
 
-    function open() {
-        root.isOpen = true;
-        root.expandedRow = null;
-    }
-
-    function close() {
-        root.isOpen = false;
-    }
-
-    function toggle() {
-        root.isOpen ? root.close() : root.open();
-    }
+    // PopupBase.open() emits this; collapse any expanded PSK row on open.
+    onPopupOpened: root.expandedRow = null;
 
     visible: root.isOpen
     color: "transparent"
-    // Fullscreen invisible window catches every click (closes the popup)
-    // while the card consumes clicks inside it. No HyprlandFocusGrab: the
-    // compositor re-evaluating focus used to close popups mid-interaction.
-    exclusiveZone: -1
-    anchors {
-        top: true
-        left: true
-        right: true
-        bottom: true
-    }
     margins.top: Theme.barHeight + Theme.popupBarGap
 
     WlrLayershell.layer: WlrLayer.Overlay

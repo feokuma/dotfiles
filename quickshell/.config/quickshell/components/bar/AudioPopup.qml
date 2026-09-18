@@ -3,6 +3,9 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Controls
 import "../../theme"
+import "../../widgets"
+
+// Audio popup:
 
 // Audio popup: output (sink) + microphone (source) sliders, opened by
 // clicking any side of the Audio pill. Replaces click-to-mute on the pill;
@@ -14,39 +17,17 @@ import "../../theme"
 //
 // Single-window overlay like Launcher: per-monitor hosts deferred until a
 // multi-monitor strategy exists.
-PanelWindow {
+PopupBase {
     id: root
 
-    property bool isOpen: false
     // Audio pill instance, wired from shell.qml — owns Pipewire state and
     // the write paths (native + BlueZ/wpctl), so they are not duplicated.
     property var audioRef: null
 
-    function open() {
-        root.isOpen = true;
-    }
-
-    function close() {
-        root.isOpen = false;
-    }
-
-    function toggle() {
-        root.isOpen ? root.close() : root.open();
-    }
-
     visible: root.isOpen
     color: "transparent"
-    // Backdrop model: a fullscreen invisible window catches every click
-    // (closes the popup), while the card consumes clicks inside it. This
-    // replaces a HyprlandFocusGrab, which closed the popup mid-drag because
-    // the compositor re-evaluates focus while the pointer moves.
-    exclusiveZone: -1
-    anchors {
-        top: true
-        left: true
-        right: true
-        bottom: true
-    }
+    // Backdrop model lives on PopupBase (fullscreen catcher + no focus grab);
+    // only appearance stays here.
     margins.top: Theme.barHeight + 6
 
     WlrLayershell.layer: WlrLayer.Overlay
