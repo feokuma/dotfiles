@@ -9,6 +9,7 @@ import "components/bar"
 import "components/launcher"
 import "components/notifications"
 import "theme"
+import "utils"
 
 ShellRoot {
     PanelWindow {
@@ -24,6 +25,17 @@ ShellRoot {
 
         // Bar height and margin live in Theme (theme/Theme.qml).
         implicitHeight: Theme.barHeight
+
+        // The popups' fullscreen click-outside catcher starts below the bar
+        // (margins.top), so bar clicks bypass it. This bar-level catcher,
+        // declared FIRST (under the pills' own MouseAreas), closes the open
+        // popup when the bar's free area is clicked; clicking a pill still
+        // goes to the pill (toggle/open) instead.
+        MouseArea {
+            anchors.fill: parent
+            enabled: PopupManager.current !== null
+            onClicked: PopupManager.current.close()
+        }
 
         Row {
             anchors {
