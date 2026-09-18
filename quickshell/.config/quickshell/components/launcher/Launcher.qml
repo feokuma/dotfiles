@@ -93,7 +93,18 @@ PanelWindow {
         if (!app)
             return;
         root.close();
-        app.execute();
+        // DesktopEntry.execute() ignores runInTerminal, so TUI apps like
+        // yazi die instantly without a terminal. Launch those inside
+        // ghostty instead (execDetached inherits the session env, so
+        // ghostty connects to the running compositor).
+        if (app.runInTerminal) {
+            Quickshell.execDetached({
+                command: ["setsid", "ghostty", "-e"].concat(app.command),
+                workingDirectory: app.workingDirectory,
+            });
+        } else {
+            app.execute();
+        }
     }
 
     visible: root.isOpen
