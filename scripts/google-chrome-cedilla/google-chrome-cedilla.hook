@@ -1,0 +1,10 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = google-chrome
+
+[Action]
+Description = Reapplying ' + c -> ç compose patch to the Google Chrome binary...
+When = PostTransaction
+Exec = /usr/bin/python3 /usr/local/bin/electron-cedilla-patch.py /opt/google/chrome/chrome
