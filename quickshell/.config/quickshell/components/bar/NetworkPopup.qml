@@ -44,7 +44,7 @@ PopupBase {
     property var expandedRow: null
 
     // PopupBase.open() emits this; collapse any expanded PSK row on open.
-    onPopupOpened: root.expandedRow = null;
+    onPopupOpened: root.expandedRow = null
 
     visible: root.isOpen
     color: "transparent"

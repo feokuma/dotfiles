@@ -75,40 +75,57 @@ PopupBase {
     // table (md-<name>), not guessed — e.g. md-bluetooth U+F00AF matches the
     // glyph already used in Bluetooth.qml.
     readonly property var bluetoothGlyphs: ({
-        // Audio / headphones / speakers
-        "audio-headphones": "󰋋",      // nf-md-headphones
-        "audio-car": "󰋋",             // car head-unit, treat as headphones
-        "headset": "󰋎",               // nf-md-headset
-        "audio-headset": "󰋎",
-        "audio-earbud": "󱡏",          // nf-md-earbuds
-        "earbud": "󱡏",
-        "audio-card": "󰓃",            // nf-md-speaker
-        "speaker": "󰓃",
-        "audio-input-microphone": "󰍬", // nf-md-microphone
-        "microphone": "󰍬",
-        // Input devices
-        "input-keyboard": "󰌌",        // nf-md-keyboard
-        "keyboard": "󰌌",
-        "input-mouse": "󰍽",           // nf-md-mouse
-        "mouse": "󰍽",
-        "input-gaming": "󰊖",          // nf-md-gamepad
-        "joystick": "󰊖",
-        "gamepad": "󰊖",
-        "input-tablet": "󰓶",          // nf-md-tablet
-        // Phones / wearables / misc
-        "phone": "󰏲",                 // nf-md-phone
-        "smartphone": "󰏲",
-        "tablet": "󰓶",
-        "watch": "󰖉",                 // nf-md-watch
-        "camera": "󰄀",                // nf-md-camera
-        "camera-photo": "󰄀",
-        "computer": "󰍹",              // nf-md-monitor
-        "laptop": "󰍹",
-        "printer": "󰐪",               // nf-md-printer
-        "modem": "󰑩",                 // md-modem missing from font; router_wireless
-        "network-wireless": "󰖩",       // nf-md-wifi
-        "remote": "󰑔"                  // nf-md-remote
-    })
+            // Audio / headphones / speakers
+            "audio-headphones": "󰋋"      // nf-md-headphones
+            ,
+            "audio-car": "󰋋"             // car head-unit, treat as headphones
+            ,
+            "headset": "󰋎"               // nf-md-headset
+            ,
+            "audio-headset": "󰋎",
+            "audio-earbud": "󱡏"          // nf-md-earbuds
+            ,
+            "earbud": "󱡏",
+            "audio-card": "󰓃"            // nf-md-speaker
+            ,
+            "speaker": "󰓃",
+            "audio-input-microphone": "󰍬" // nf-md-microphone
+            ,
+            "microphone": "󰍬",
+            // Input devices
+            "input-keyboard": "󰌌"        // nf-md-keyboard
+            ,
+            "keyboard": "󰌌",
+            "input-mouse": "󰍽"           // nf-md-mouse
+            ,
+            "mouse": "󰍽",
+            "input-gaming": "󰊖"          // nf-md-gamepad
+            ,
+            "joystick": "󰊖",
+            "gamepad": "󰊖",
+            "input-tablet": "󰓶"          // nf-md-tablet
+            ,
+            // Phones / wearables / misc
+            "phone": "󰏲"                 // nf-md-phone
+            ,
+            "smartphone": "󰏲",
+            "tablet": "󰓶",
+            "watch": "󰖉"                 // nf-md-watch
+            ,
+            "camera": "󰄀"                // nf-md-camera
+            ,
+            "camera-photo": "󰄀",
+            "computer": "󰍹"              // nf-md-monitor
+            ,
+            "laptop": "󰍹",
+            "printer": "󰐪"               // nf-md-printer
+            ,
+            "modem": "󰑩"                 // md-modem missing from font; router_wireless
+            ,
+            "network-wireless": "󰖩"       // nf-md-wifi
+            ,
+            "remote": "󰑔"                  // nf-md-remote
+        })
     // Fallback glyph: plain bluetooth symbol, same codepoint as the bar pill.
     readonly property string bluetoothGlyphFallback: "󰂯" // nf-md-bluetooth
 
@@ -131,11 +148,16 @@ PopupBase {
     // Battery level glyphs (MDI battery family), codepoints verified against
     // the installed font; consistent with the levels used in Battery.qml.
     function batteryGlyph(pct: int): string {
-        if (pct >= 90) return "󰁹"; // nf-md-battery
-        if (pct >= 60) return "󰁿"; // md-battery-80
-        if (pct >= 40) return "󰁾"; // nf-md-battery_60
-        if (pct >= 20) return "󰁽"; // nf-md-battery_40
-        if (pct >= 15) return "󰁼"; // nf-md-battery_20
+        if (pct >= 90)
+            return "󰁹"; // nf-md-battery
+        if (pct >= 60)
+            return "󰁿"; // md-battery-80
+        if (pct >= 40)
+            return "󰁾"; // nf-md-battery_60
+        if (pct >= 20)
+            return "󰁽"; // nf-md-battery_40
+        if (pct >= 15)
+            return "󰁼"; // nf-md-battery_20
         return "󰂎"; // nf-md-battery_alert (low)
     }
 
@@ -221,9 +243,7 @@ PopupBase {
 
                         anchors.verticalCenter: parent.verticalCenter
 
-                        readonly property bool adapterBusy: root.adapter
-                            && (root.adapter.state === BluetoothAdapterState.Enabling
-                                || root.adapter.state === BluetoothAdapterState.Disabling)
+                        readonly property bool adapterBusy: root.adapter && (root.adapter.state === BluetoothAdapterState.Enabling || root.adapter.state === BluetoothAdapterState.Disabling)
 
                         enabled: root.adapter && !adapterBusy
                         onToggled: {
@@ -243,9 +263,7 @@ PopupBase {
                             implicitWidth: 34
                             implicitHeight: 20
                             radius: height / 2
-                            color: powerSwitch.adapterBusy ? Theme.textMuted
-                                 : powerSwitch.checked ? Theme.accent
-                                 : Theme.crust
+                            color: powerSwitch.adapterBusy ? Theme.textMuted : powerSwitch.checked ? Theme.accent : Theme.crust
                             border.width: 1
                             border.color: powerSwitch.checked ? Theme.accent : Theme.textMuted
                             opacity: powerSwitch.enabled ? 1.0 : 0.5
@@ -288,9 +306,7 @@ PopupBase {
             // powered on; show a hint otherwise.
             Text {
                 visible: !root.adapter || !root.adapter.enabled
-                text: root.adapter && root.adapter.state === BluetoothAdapterState.Blocked
-                      ? "Bluetooth is blocked"
-                      : "Turn Bluetooth on to see devices"
+                text: root.adapter && root.adapter.state === BluetoothAdapterState.Blocked ? "Bluetooth is blocked" : "Turn Bluetooth on to see devices"
                 font.pixelSize: Theme.fontSize
                 font.family: Theme.fontFamily
                 font.bold: Theme.fontBold
@@ -328,7 +344,7 @@ PopupBase {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.right: parent.right
                     text: "Open bluetoothctl"
-                    onClicked: ghosttyProc.running = true;
+                    onClicked: ghosttyProc.running = true
                 }
             }
 
@@ -384,10 +400,7 @@ PopupBase {
 
         // Row is interactive only while a device is bound and the connection
         // is not mid-transition.
-        readonly property bool busy: device
-                                 && (device.state === BluetoothDeviceState.Connecting
-                                     || device.state === BluetoothDeviceState.Disconnecting
-                                     || device.pairing)
+        readonly property bool busy: device && (device.state === BluetoothDeviceState.Connecting || device.state === BluetoothDeviceState.Disconnecting || device.pairing)
 
         // State binds straight to the device object: notify signals are
         // wired via Q_OBJECT_BINDABLE_PROPERTY on Quickshell.Bluetooth
