@@ -289,6 +289,7 @@ PopupBase {
 
             anchors.verticalCenter: rowHeader.verticalCenter
             anchors.left: parent.left
+            leftPadding: 10
             width: 24
             text: root.signalGlyph(row.strength, row.locked)
             font.family: Theme.fontFamily
@@ -331,6 +332,7 @@ PopupBase {
 
             anchors.verticalCenter: rowHeader.verticalCenter
             anchors.right: row.expanded ? forgetButton.left : parent.right
+            rightPadding: 10
             anchors.rightMargin: row.expanded ? 10 : 0
             text: {
                 if (!row.network)

@@ -443,6 +443,7 @@ PopupBase {
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
+            leftPadding: 10
             width: 24
             text: root.deviceGlyph(device && device.icon ? device.icon : "")
             font.family: Theme.fontFamily
