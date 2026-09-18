@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Controls
 import "../../theme"
+import "../../widgets"
 
 // Network popup: scanned network list with inline PSK entry and
 // connect/disconnect/forget. Opened by clicking the Network bar pill.
@@ -85,24 +86,36 @@ PanelWindow {
     // -lock variants fold the security lock into the signal glyph so each
     // row renders ONE icon instead of glyph + padlock.
     readonly property var signalGlyphs: ({
-        none: "󰤫",   // nf-md-wifi-strength-off
-        s1: "󰤟",     // nf-md-wifi-strength-1-lock (lock variant)
-        s2: "󰤧",     // nf-md-wifi-strength-2-lock
-        s3: "󰤯",     // nf-md-wifi-strength-3-lock
-        s4: "󰤲",     // nf-md-wifi-strength-4-lock
-        s1o: "󰤞",    // nf-md-wifi-strength-1 (open)
-        s2o: "󰤦",    // nf-md-wifi-strength-2
-        s3o: "󰤮",    // nf-md-wifi-strength-3
-        s4o: "󰤱"     // nf-md-wifi-strength-4
-    })
+            none: "󰤫"   // nf-md-wifi-strength-off
+            ,
+            s1: "󰤟"     // nf-md-wifi-strength-1-lock (lock variant)
+            ,
+            s2: "󰤧"     // nf-md-wifi-strength-2-lock
+            ,
+            s3: "󰤯"     // nf-md-wifi-strength-3-lock
+            ,
+            s4: "󰤲"     // nf-md-wifi-strength-4-lock
+            ,
+            s1o: "󰤞"    // nf-md-wifi-strength-1 (open)
+            ,
+            s2o: "󰤦"    // nf-md-wifi-strength-2
+            ,
+            s3o: "󰤮"    // nf-md-wifi-strength-3
+            ,
+            s4o: "󰤱"     // nf-md-wifi-strength-4
+        })
 
     function signalGlyph(strength: real, locked: bool): string {
         const g = root.signalGlyphs;
         let base;
-        if (strength >= 0.75)      base = locked ? g.s4 : g.s4o;
-        else if (strength >= 0.50) base = locked ? g.s3 : g.s3o;
-        else if (strength >= 0.25) base = locked ? g.s2 : g.s2o;
-        else                       base = locked ? g.s1 : g.s1o;
+        if (strength >= 0.75)
+            base = locked ? g.s4 : g.s4o;
+        else if (strength >= 0.50)
+            base = locked ? g.s3 : g.s3o;
+        else if (strength >= 0.25)
+            base = locked ? g.s2 : g.s2o;
+        else
+            base = locked ? g.s1 : g.s1o;
         return base;
     }
 
@@ -111,9 +124,7 @@ PanelWindow {
     // 802.1X) are not prompted for here — connect() may still work if NM
     // already holds their settings.
     function needsPsk(security): bool {
-        return security === WifiSecurityType.WpaPsk
-            || security === WifiSecurityType.Wpa2Psk
-            || security === WifiSecurityType.Sae;
+        return security === WifiSecurityType.WpaPsk || security === WifiSecurityType.Wpa2Psk || security === WifiSecurityType.Sae;
     }
 
     Rectangle {
@@ -125,8 +136,7 @@ PanelWindow {
             rightMargin: Theme.barMargin
         }
         width: Theme.popupWidth
-        height: Math.min(contentColumn.implicitHeight + Theme.popupPadding * 2,
-                         root.height - margins.top - 10)
+        height: Math.min(contentColumn.implicitHeight + Theme.popupPadding * 2, root.height - margins.top - 10)
         radius: Theme.pillRadius
         color: Theme.crust
         border.width: 1
@@ -186,15 +196,15 @@ PanelWindow {
                 }
 
                 // Scan (scannerEnabled) toggle: mirrors the bluetooth scan
-                // pattern — a TogglePill that drives a reactive backend
+                // pattern — a themed Button that drives a reactive backend
                 // property. Active (filled) while scanning.
-                TogglePill {
-                    anchors.verticalCenter: parent.verticalCenter
+                TextButton {
+                    anchors.verticalCenter: headerRow.verticalCenter
                     anchors.right: parent.right
-                    label: root.wifiDevice && root.wifiDevice.scannerEnabled ? "Scanning…" : "Scan"
+                    text: root.wifiDevice && root.wifiDevice.scannerEnabled ? "Scanning…" : "Scan"
                     active: !!root.wifiDevice && root.wifiDevice.scannerEnabled
                     enabled: !!root.wifiDevice
-                    onActivated: {
+                    onClicked: {
                         if (root.wifiDevice)
                             root.wifiDevice.scannerEnabled = !root.wifiDevice.scannerEnabled;
                     }
@@ -234,52 +244,6 @@ PanelWindow {
     // element inside the surface has focus.
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
-    // Compact pill button, same as BluetoothPopup's local TogglePill.
-    // A generic button only earns a widgets/ file once a second consumer
-    // appears (there are now two: bluetooth + network).
-    component TogglePill: Rectangle {
-        id: pill
-
-        property string label
-        property bool active: false
-        property bool busy: false
-        signal activated
-
-        readonly property int hPad: 12
-
-        implicitHeight: 26
-        width: pillText.implicitWidth + hPad * 2
-        radius: height / 2
-        color: Theme.crust
-        border.width: 1
-        border.color: active ? Theme.accent : Theme.textMuted
-        opacity: enabled ? 1.0 : 0.5
-
-        Behavior on border.color {
-            NumberAnimation {
-                duration: Theme.animFast
-            }
-        }
-
-        Text {
-            id: pillText
-
-            anchors.centerIn: parent
-            text: pill.label
-            font.pixelSize: Theme.fontSize - 1
-            font.family: Theme.fontFamily
-            font.bold: Theme.fontBold
-            color: pill.active ? Theme.accent : Theme.text
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            enabled: pill.enabled
-            cursorShape: Qt.PointingHandCursor
-            onClicked: pill.activated()
-        }
-    }
-
     // One network row: signal glyph (lock folded in), SSID, right-hand
     // status; click to connect/disconnect, expandable inline PSK field,
     // forget action for known networks. Expansion state lives at popup
@@ -316,10 +280,24 @@ PanelWindow {
             row.errorText = "";
         }
 
+        // Always-visible strip at the top of the row (SSID, signal, status).
+        // Row content centers on this instead of the whole Item so the line
+        // stays put when the PSK field grows the row's height below it.
+        Item {
+            id: rowHeader
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: Theme.popupRowHeight
+        }
+
         Rectangle {
             id: hoverRect
 
-            anchors.fill: parent
+            // Hover highlight only over the header strip: while expanded,
+            // the PSK area below must not glow as if the row were hoverable.
+            anchors.fill: rowHeader
             radius: Theme.pillRadius
             color: Theme.highlight
             opacity: hoverArea.containsMouse ? 0.12 : 0.0
@@ -333,7 +311,7 @@ PanelWindow {
         Text {
             id: iconSlot
 
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenter: rowHeader.verticalCenter
             anchors.left: parent.left
             width: 24
             text: root.signalGlyph(row.strength, row.locked)
@@ -344,25 +322,38 @@ PanelWindow {
         }
 
         Text {
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenter: rowHeader.verticalCenter
             anchors.left: iconSlot.right
             anchors.leftMargin: 10
-            anchors.right: statusText.left
+            anchors.right: strengthText.left
             anchors.rightMargin: 8
             text: network ? network.name : ""
             elide: Text.ElideRight
             font.pixelSize: Theme.fontSize
             font.family: Theme.fontFamily
             font.bold: Theme.fontBold
-            color: row.connected ? Theme.text
-                 : row.needsPassword ? Theme.text
-                 : Theme.textMuted
+            color: row.connected ? Theme.text : row.needsPassword ? Theme.text : Theme.textMuted
+        }
+
+        // Numeric signal strength (signalStrength is 0.0..1.0), shown as a
+        // percentage next to the signal glyph.
+        Text {
+            id: strengthText
+
+            anchors.verticalCenter: rowHeader.verticalCenter
+            anchors.right: statusText.left
+            anchors.rightMargin: 8
+            text: row.network ? Math.round(row.strength * 100) + "%" : ""
+            font.pixelSize: Theme.fontSize - 2
+            font.family: Theme.fontFamily
+            font.bold: Theme.fontBold
+            color: Theme.textMuted
         }
 
         Text {
             id: statusText
 
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenter: rowHeader.verticalCenter
             anchors.right: row.expanded ? forgetButton.left : parent.right
             anchors.rightMargin: row.expanded ? 10 : 0
             text: {
@@ -385,52 +376,41 @@ PanelWindow {
         // Forget action, shown on hover for known (saved) networks. Uses the
         // 0.3.1 Network.forget() invokable; only meaningful while not
         // connected, since disconnect() is the row's primary click action.
-        Rectangle {
+        TextButton {
             id: forgetButton
 
-            readonly property bool shown: hoverArea.containsMouse
-                && row.network && row.network.known && !row.connected
+            // Sits above hoverArea (declared later, covers the whole row):
+            // without z its clicks land on the row handler instead (which
+            // would connect to the network). hoverEnabled stays off so
+            // hoverArea keeps driving containsMouse — the button hides
+            // itself otherwise.
+            z: 1
 
-            anchors.verticalCenter: parent.verticalCenter
+            readonly property bool shown: hoverArea.containsMouse && row.network && row.network.known && !row.connected
+
+            anchors.verticalCenter: rowHeader.verticalCenter
             anchors.right: parent.right
-            width: shown ? forgetText.implicitWidth + 12 : 0
-            height: 22
-            radius: 6
+            text: "Forget"
             visible: opacity > 0
             opacity: shown ? 1.0 : 0.0
-            color: Theme.crust
-            border.width: 1
-            border.color: Theme.textMuted
+            enabled: shown
+            // Never accepts hover itself: hoverArea (row) keeps driving
+            // containsMouse, which controls `shown`. Accepting hover here
+            // would flip shown off under the cursor and oscillate.
+            hoverEnabled: false
+            font.pixelSize: Theme.fontSize - 2
+            leftPadding: 6
+            rightPadding: 6
 
-            Behavior on width {
-                NumberAnimation {
-                    duration: Theme.animFast
-                }
-            }
             Behavior on opacity {
                 NumberAnimation {
                     duration: Theme.animFast
                 }
             }
 
-            Text {
-                id: forgetText
-
-                anchors.centerIn: parent
-                text: "Forget"
-                font.pixelSize: Theme.fontSize - 2
-                font.family: Theme.fontFamily
-                font.bold: Theme.fontBold
-                color: Theme.text
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    if (row.network)
-                        row.network.forget();
-                }
+            onClicked: {
+                if (row.network)
+                    row.network.forget();
             }
         }
 
@@ -482,6 +462,13 @@ PanelWindow {
             }
             spacing: 4
 
+            Text {
+                text: "Password"
+                font.pixelSize: Theme.fontSize
+                font.family: Theme.fontFamily
+                color: Theme.textMuted
+            }
+
             TextField {
                 id: pskInput
 
@@ -492,13 +479,13 @@ PanelWindow {
                 font.pixelSize: Theme.fontSize - 2
                 font.family: Theme.fontFamily
                 color: Theme.text
-                // No theme-controlled background without a full style; the
-                // border marks the field.
+                // Border marks the field: muted normally, text-colored while
+                // focused for clear affordance, warning on a failed attempt.
                 background: Rectangle {
                     radius: 6
                     color: Qt.rgba(Theme.crust.r, Theme.crust.g, Theme.crust.b, 0.9)
                     border.width: 1
-                    border.color: row.errorText.length > 0 ? Theme.warning : Theme.textMuted
+                    border.color: row.errorText.length > 0 ? Theme.warning : pskInput.activeFocus ? Theme.text : Theme.textMuted
                 }
                 enabled: !row.busy
 
@@ -519,19 +506,19 @@ PanelWindow {
                 anchors.right: parent.right
                 spacing: 6
 
-                TogglePill {
-                    label: "Cancel"
-                    onActivated: {
+                TextButton {
+                    text: "Cancel"
+                    onClicked: {
                         root.expandedRow = null;
                         row.errorText = "";
                     }
                 }
 
-                TogglePill {
-                    label: row.busy ? "Connecting…" : "Connect"
+                TextButton {
+                    text: row.busy ? "Connecting…" : "Connect"
                     active: row.busy
                     enabled: !row.busy && pskInput.text.length > 0
-                    onActivated: row.tryConnect()
+                    onClicked: row.tryConnect()
                 }
             }
         }
@@ -557,6 +544,16 @@ PanelWindow {
                     pskInput.forceActiveFocus();
                 } else {
                     row.errorText = "Failed: " + ConnectionFailReason.toString(reason);
+                }
+            }
+
+            // Successful connection: collapse the PSK entry back into the
+            // plain network list (failures keep it open for retry).
+            function onStateChanged(state) {
+                if (state === ConnectionState.Connected && root.expandedRow === row) {
+                    root.expandedRow = null;
+                    row.errorText = "";
+                    pskInput.clear();
                 }
             }
         }
