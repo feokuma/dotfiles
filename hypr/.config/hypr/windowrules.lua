@@ -41,3 +41,14 @@ hl.window_rule({
 
     float = true,
 })
+
+hl.window_rule({
+    -- Any window that becomes floating (e.g. via SUPER+F) opens small and
+    -- centered. The `float` matcher reacts to the floating state, so it also
+    -- applies to windows floated dynamically after opening.
+    name = "floating-small-centered",
+    match = { float = true, fullscreen = false },
+
+    size = { "(monitor_w*0.6)", "(monitor_h*0.6)" },
+    center = true,
+})
