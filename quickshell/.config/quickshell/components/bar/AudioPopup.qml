@@ -295,14 +295,22 @@ PanelWindow {
                     opacity: 0.85
                 }
 
-                // Filled portion of the track, up to the knob center.
+                // Filled portion of the track: its right edge follows the
+                // knob's edge (knob width = height + 6, moving within
+                // availableWidth - knobWidth), so the fill reaches the end
+                // exactly when the knob does; clamped to stay inside the
+                // 1px border.
                 Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     height: parent.height - 2
                     x: 1
-                    width: Math.max(
-                        2,
-                        1 + (trackWrap.availableWidth * trackWrap.visualPosition) + trackWrap.height / 2
+                    width: Math.min(
+                        parent.width - 2,
+                        Math.max(
+                            2,
+                            trackWrap.visualPosition * (trackWrap.availableWidth - trackWrap.height - 6)
+                                + trackWrap.height + 6 - 1
+                        )
                     )
                     radius: height / 2
                     color: row.accent
