@@ -74,11 +74,20 @@ python3 /usr/local/bin/electron-cedilla-patch.py /usr/lib/electron42/electron
 ### Desfazer
 
 ```bash
-sudo cp -a /usr/lib/electron42/electron.orig /usr/lib/electron42/electron
 sudo rm /etc/pacman.d/hooks/electron42-cedilla.hook /usr/local/bin/electron-cedilla-patch.py
+sudo pacman -S electron42
 ```
 
-(ou simplesmente reinstale o pacote: `sudo pacman -S electron42`)
+Reinstalar o pacote é a reversão segura após upgrades: o backup `.orig` só é
+confiável para a versão na qual foi criado — após um upgrade, `electron.orig`
+contém o binário da versão anterior (sem uso). O script recria o `.orig`
+automaticamente quando detecta que o binário mudou e, de qualquer forma,
+grava um `electron.bak-<data>` do binário atual antes de cada patch.
+Para reverter imediatamente (mesma versão, antes de qualquer upgrade):
+
+```bash
+sudo cp -a /usr/lib/electron42/electron.orig /usr/lib/electron42/electron
+```
 
 ## Arquivos
 

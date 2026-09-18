@@ -2,3 +2,4 @@
 # Ver https://quickshell.org/docs/guide/install-setup/#language-server
 quickshell/.config/quickshell/.qmlls.ini
 **/.qmlls.ini
+__pycache__/

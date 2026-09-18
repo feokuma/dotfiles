@@ -37,16 +37,26 @@ def main():
 
     data = open(BIN, "rb").read()
 
-    total_old = sum(data.count(old) for _, old, _ in PATCHES)
+    counts = {desc: data.count(old) for desc, old, _ in PATCHES}
+    total_old = sum(counts.values())
     if total_old == 0:
-        patched_new = sum(data.count(new) for _, _, new in PATCHES)
-        if patched_new > 0:
+        new_counts = {desc: data.count(new) for desc, _, new in PATCHES}
+        if all(n > 0 for n in new_counts.values()):
             print("[ok] already patched (nothing to do).")
             return 0
-        print("[warn] pattern not found — the compose table format may have "
-              "changed in this Chromium version. Please check upstream.",
-              file=sys.stderr)
+        print("[note] no compose-table patch target found. The binary either "
+              "already ships c -> ç upstream or the compose table layout "
+              "changed. Nothing to do.")
         return 2
+    # the two entries belong to the same compose table set — a one-sided
+    # match means the table layout changed and the 4-byte patterns may hit
+    # unrelated data, so refuse to patch instead of guessing
+    if any(n == 0 for n in counts.values()):
+        for desc, n in counts.items():
+            print(f"[err] {desc}: found {n} occurrence(s)", file=sys.stderr)
+        print("[error] asymmetric pattern match; refusing to patch.",
+              file=sys.stderr)
+        return 3
 
     new_data = data
     report = []
@@ -55,16 +65,35 @@ def main():
         new_data = new_data.replace(old, new)
         report.append(f"  {desc}: {n} occurrence(s) replaced")
 
-    # keep a pristine .orig once, plus a timestamped backup each run
+    # keep a pristine .orig once (per installed version — recreated if the
+    # binary changed since, e.g. after a package upgrade), plus a timestamped
+    # backup of the CURRENT binary before every patch run
     ts = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    if not os.path.exists(BIN + ".orig"):
-        shutil.copy2(BIN, BIN + ".orig")
-        print(f"[backup] pristine original saved to {BIN}.orig")
     shutil.copy2(BIN, f"{BIN}.bak-{ts}")
+    try:
+        if os.path.exists(BIN + ".orig"):
+            with open(BIN + ".orig", "rb") as f_orig, open(BIN, "rb") as f_cur:
+                differs = f_orig.read() != f_cur.read()
+        else:
+            differs = True
+    except OSError:
+        differs = False
+    if differs:
+        shutil.copy2(BIN, BIN + ".orig")
+        print(f"[backup] pristine original of this version saved to {BIN}.orig")
 
-    with open(BIN, "r+b") as f:
-        f.write(new_data)
-        f.truncate(len(new_data))
+    # write defensively instead of re-truncating in place: same target bytes,
+    # but a mid-write failure can't leave a half-patched binary behind
+    tmp = BIN + ".patched-tmp"
+    with open(tmp, "wb") as f_tmp:
+        f_tmp.write(new_data)
+        f_tmp.flush()
+        os.fsync(f_tmp.fileno())
+    st = os.stat(BIN)
+    os.chmod(tmp, st.st_mode & 0o777)
+    # preserve ownership too (root:root)
+    os.chown(tmp, st.st_uid, st.st_gid)
+    os.replace(tmp, BIN)
 
     print("[ok] patch applied:")
     print("\n".join(report))

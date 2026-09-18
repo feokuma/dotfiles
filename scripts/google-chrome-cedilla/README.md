@@ -69,11 +69,16 @@ Após um upgrade do `google-chrome`, verifique com o teste acima. Se
 3. Reverter:
 
    ```bash
-   sudo cp -a /opt/google/chrome/chrome.orig /opt/google/chrome/chrome
    sudo rm /etc/pacman.d/hooks/google-chrome-cedilla.hook
+   yay -S google-chrome   # reversão segura a partir de .orig após upgrades
    ```
 
-   (ou reinstale o pacote: `yay -S google-chrome`)
+   O backup `.orig` é confiável apenas para a versão na qual foi criado
+   (o script o recria quando o binário muda). Para reverter na mesma versão:
+
+   ```bash
+   sudo cp -a /opt/google/chrome/chrome.orig /opt/google/chrome/chrome
+   ```
 
 ## Arquivos
 
