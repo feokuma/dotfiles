@@ -17,8 +17,8 @@ import "../../widgets"
 //   Network.disconnect() / forget() / connectionFailed(reason)
 //
 // NOTE: the 0.3.1 NetworkDevice API exposes no reactive rfkill/enable
-// property, so there is deliberately no WiFi on/off toggle here (same
-// reason the old pill never had one); rfkill lives in the system layer.
+// property, so there is deliberately no WiFi on/off toggle here;
+// rfkill lives in the system layer.
 //
 // Container mirrors BluetoothPopup: a fullscreen invisible PanelWindow
 // overlay with a rounded card anchored to the bar's right side, a
@@ -86,8 +86,6 @@ PanelWindow {
     // -lock variants fold the security lock into the signal glyph so each
     // row renders ONE icon instead of glyph + padlock.
     readonly property var signalGlyphs: ({
-            none: "󰤫"   // nf-md-wifi-strength-off
-            ,
             s1: "󰤟"     // nf-md-wifi-strength-1-lock (lock variant)
             ,
             s2: "󰤧"     // nf-md-wifi-strength-2-lock
@@ -332,7 +330,7 @@ PanelWindow {
             font.pixelSize: Theme.fontSize
             font.family: Theme.fontFamily
             font.bold: Theme.fontBold
-            color: row.connected ? Theme.text : row.needsPassword ? Theme.text : Theme.textMuted
+            color: row.connected || row.needsPassword ? Theme.text : Theme.textMuted
         }
 
         // Numeric signal strength (signalStrength is 0.0..1.0), shown as a
