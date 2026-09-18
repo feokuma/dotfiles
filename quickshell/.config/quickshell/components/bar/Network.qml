@@ -8,6 +8,10 @@ Pill {
 
     width: label.implicitWidth + Theme.pillPaddingH
 
+    // Popup attached by shell.qml; clicks toggle it (the popup owns all
+    // network actions). Hover hint behavior is preserved.
+    property var popup: null
+
     property bool connected: false
     property real wifiSignal: 0.0
     property string wifiName: ""
@@ -108,14 +112,17 @@ Pill {
         text: root.networkLabel()
     }
 
-    // Hover target for the WiFi hint; hover-only, so clicks stay click-through
-    // on this pill (no click behavior defined here).
+    // Click opens the network popup; hover still shows the WiFi hint.
     MouseArea {
         id: hoverArea
 
         anchors.fill: parent
         hoverEnabled: true
-        acceptedButtons: Qt.NoButton
+        acceptedButtons: Qt.LeftButton
+        onClicked: {
+            if (root.popup)
+                root.popup.toggle();
+        }
     }
 
     // Network name (SSID) shown below the pill while hovered.

@@ -58,7 +58,9 @@ ShellRoot {
             }
 
             Network {
+                id: network
                 Layout.preferredWidth: width
+                popup: networkPopup
             }
 
             Bluetooth {
@@ -89,6 +91,10 @@ ShellRoot {
 
     BluetoothPopup {
         id: bluetoothPopup
+    }
+
+    NetworkPopup {
+        id: networkPopup
     }
 
     Launcher {
