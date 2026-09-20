@@ -75,6 +75,12 @@ cada arquivo cuida de uma parte: `monitors`, `input`, `environment`,
   encontra `Adwaita-dark` e cai no tema claro padrão, mesmo com
   `prefer-dark` no gsettings
 - `stow` (para instalar os pacotes)
+- **`mise`** (repositório oficial do Arch) — gerenciador de versões de
+  ferramentas de desenvolvimento (ex.: `dotnet`). Ativado no `.zshrc`
+  via `eval "$(mise activate zsh)"`, que coloca os shims no `PATH` por
+  sessão. Versões ficam em `~/.config/mise/config.toml` (global) ou em
+  `.mise.toml` / `.tool-versions` por projeto; veja [Gerenciamento de
+  versões (mise)](#gerenciamento-de-versões-mise).
 - **VS Code**: instalar `visual-studio-code-electron-bin` (AUR, via `yay`).
   Usa o Electron do sistema (`electron42`) em vez do Chromium empacotado
   da Microsoft, o que facilita aplicar o workaround da cedilha (ç)
@@ -102,6 +108,46 @@ Depois de alterar a configuração do Hyprland, recarregue com:
 ```bash
 hyprctl reload
 ```
+
+## Gerenciamento de versões (mise)
+
+Versões de ferramentas de desenvolvimento são gerenciadas com
+[`mise`](https://mise.jdx.dev/) em vez de pacotes do pacman/AUR. Hoje o
+uso principal é o **.NET SDK**, mas a ideia é centralizar futuras
+ferramentas (Node, Python, Go, etc.) nele também.
+
+- **Instalação**: pacote `mise` dos repositórios oficiais do Arch
+  (`sudo pacman -S mise`).
+- **Ativação no shell**: uma única linha no fim do `.zshrc`:
+
+  ```zsh
+  eval "$(mise activate zsh)"
+  ```
+
+  O `activate` injeta os shims no `PATH` da sessão, então `dotnet`,
+  `node` etc. apontam para a versão definida pelo mise, e a versão é
+  trocada automaticamente ao entrar em um diretório com arquivo de
+  config do mise.
+
+- **Configuração**: as versões ficam nos arquivos do mise, não no
+  repositório de dotfiles:
+  - `~/.config/mise/config.toml` — versões globais;
+  - `.mise.toml` / `.tool-versions` na raiz de um projeto — versões
+    por projeto.
+
+- **Uso básico**:
+
+  ```bash
+  mise ls                 # ferramentas instaladas
+  mise use -g dotnet@10   # define a versão global (grava no config.toml)
+  mise use dotnet@9       # define a versão só para o diretório atual
+  mise install            # instala as versões declaradas nos configs
+  mise upgrade            # atualiza as ferramentas gerenciadas
+  ```
+
+Ferramentas gerenciadas pelo mise **não** devem ser instaladas em
+paralelo via pacman/AUR, para evitar dois `dotnet`/`node` conflitantes
+no `PATH`.
 
 ## Neovim + Quickshell
 
