@@ -85,12 +85,8 @@ Pill {
 
     // Display name of the active device, for popup hover hints. Same fallback
     // chain as the dropdown rows (description → nickname → name).
-    readonly property string defaultSinkName: sink
-        ? (sink.description || sink.nickname || sink.name || "")
-        : ""
-    readonly property string defaultSourceName: source
-        ? (source.description || source.nickname || source.name || "")
-        : "N/A"
+    readonly property string defaultSinkName: sink ? (sink.description || sink.nickname || sink.name || "") : ""
+    readonly property string defaultSourceName: source ? (source.description || source.nickname || source.name || "") : "N/A"
 
     // Default-device switching goes through wpctl: quickshell (0.3.1) writes
     // the WirePlumber-0.4 metadata keys (`default.configured.audio.*`), which
@@ -215,13 +211,11 @@ Pill {
 
     ScrollHandler {
         id: sinkScroll
-        threshold: 1200
         onStepped: direction => root.stepSink(direction)
     }
 
     ScrollHandler {
         id: sourceScroll
-        threshold: 1200
         onStepped: direction => root.stepSource(direction)
     }
 
@@ -349,4 +343,3 @@ Pill {
         }
     }
 }
-
