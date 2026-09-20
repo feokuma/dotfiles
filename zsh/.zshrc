@@ -4,6 +4,15 @@ compinit
 # Completion case-insensitive: "do[Tab]" completa "Downloads"
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
+# History
+export HISTFILE="$HOME/.zsh_history"
+HISTSIZE=10000
+SAVEHIST=10000
+setopt share_history        # share entries across terminals immediately
+setopt hist_ignore_all_dups # a new entry erases an older identical one
+setopt hist_ignore_space    # commands starting with " " aren't saved
+setopt hist_reduce_blanks   # strip redundant whitespace
+setopt hist_verify          # !! expands on enter for review before execution
 
 # Default editor (used by yazi, git, fzf, etc.)
 export EDITOR="nvim"
