@@ -55,6 +55,14 @@ QtObject {
     readonly property int notificationTimeoutSec: 5  // fallback for expireTimeout <= 0
     readonly property int notificationMaxVisible: 5
 
+    // About window ("About this system", opened from the power menu).
+    // Padding keeps the info rows off the card edges. The full card width
+    // is dynamic: proportional logo art + gap + this fixed info column
+    // (460px fits the longest info line, "Display (...)" ~432px).
+    readonly property int aboutInfoWidth: 460
+    readonly property int aboutPadding: 26
+    readonly property int aboutRowSpacing: 8
+
     // Animation durations
     readonly property int animFast: 150
     // Softer, more deliberate transitions (switches, state changes).

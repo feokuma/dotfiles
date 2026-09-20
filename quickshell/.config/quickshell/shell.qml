@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
+import "components/about"
 import "components/bar"
 import "components/launcher"
 import "components/notifications"
@@ -117,8 +118,15 @@ ShellRoot {
         id: launcher
     }
 
+    // Floating, centered "About this system" window, opened by the
+    // power menu's About row.
+    AboutWindow {
+        id: aboutWindow
+    }
+
     PowerMenuPopup {
         id: powerMenuPopup
+        aboutWindow: aboutWindow
     }
 
     Notifications {}

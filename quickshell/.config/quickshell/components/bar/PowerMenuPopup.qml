@@ -164,6 +164,66 @@ PopupBase {
             rightPadding: Theme.popupPadding
             spacing: 6
 
+            // About row: opens ghostty + fastfetch, floating and centered
+            // (Hyprland `fastfetch-about` window rule). Non-destructive: no
+            // confirmation needed, closes the popup on click.
+            Item {
+                id: aboutRow
+
+                width: contentColumn.width - contentColumn.leftPadding - contentColumn.rightPadding
+                height: Theme.popupRowHeight
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: Theme.pillRadius
+                    color: Theme.highlight
+                    opacity: aboutArea.containsMouse ? 0.12 : 0.0
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Theme.animFast
+                        }
+                    }
+                }
+
+                Text {
+                    id: aboutIcon
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    leftPadding: 10
+                    width: 24
+                    text: "󰋽" // md-information_outline
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize + 4
+                    font.bold: Theme.fontBold
+                    color: Theme.text
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: aboutIcon.right
+                    anchors.leftMargin: 10
+                    text: "About this system"
+                    font.pixelSize: Theme.fontSize
+                    font.family: Theme.fontFamily
+                    font.bold: Theme.fontBold
+                    color: Theme.text
+                }
+
+                MouseArea {
+                    id: aboutArea
+
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (root.aboutWindow)
+                            root.aboutWindow.open();
+                        root.close();
+                    }
+                }
+            }
+
             Item {
                 id: headerRow
 
