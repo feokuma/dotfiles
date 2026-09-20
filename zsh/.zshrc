@@ -1,6 +1,10 @@
 autoload -Uz compinit
 compinit
 
+# Completion case-insensitive: "do[Tab]" completa "Downloads"
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+
+
 # Default editor (used by yazi, git, fzf, etc.)
 export EDITOR="nvim"
 export VISUAL="nvim"
