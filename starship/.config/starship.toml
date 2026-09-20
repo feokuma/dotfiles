@@ -55,7 +55,8 @@ style = ""
 # ── Diretório ────────────────────────────────────────────────
 [directory]
 style = "bold dir"
-format = "[$path ]($style)[$read_only]($read_only_style)"
+#  - seta separadora entre segmentos, estilo p10k lean + arrows
+format = "[$path ]($style)[$read_only]($read_only_style)[](overlay0)"
 truncation_length = 3
 truncation_symbol = "…/"
 truncate_to_repo = true
@@ -128,7 +129,7 @@ typechanged = "T${count}"
 [os]
 disabled = false
 style = "bold cyan"
-format = "[$symbol]($style) "
+format = "[$symbol]($style) [](overlay0)"
 
 [os.symbols]
 Arch = "󰣇"
