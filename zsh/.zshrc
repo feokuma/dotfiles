@@ -64,3 +64,4 @@ code() {
 alias ls='eza'
 alias la='eza -la'
 alias tree='eza --tree'
+eval "$(mise activate zsh)"
