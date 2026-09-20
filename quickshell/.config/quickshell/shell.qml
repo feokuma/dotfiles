@@ -45,7 +45,11 @@ ShellRoot {
             }
             spacing: Theme.itemSpacing
 
-            HyprlandLogo {}
+            HyprlandLogo {
+                id: hyprlandLogo
+                Layout.preferredWidth: width
+                popup: powerMenuPopup
+            }
 
             Workspaces {}
         }
@@ -111,6 +115,10 @@ ShellRoot {
 
     Launcher {
         id: launcher
+    }
+
+    PowerMenuPopup {
+        id: powerMenuPopup
     }
 
     Notifications {}
