@@ -66,12 +66,15 @@ Após um upgrade do `google-chrome`, verifique com o teste acima. Se
    sudo install -Dm644 google-chrome-cedilla.hook /etc/pacman.d/hooks/google-chrome-cedilla.hook
    ```
 
-3. Reverter:
+3. Reverter — via script:
 
    ```bash
-   sudo rm /etc/pacman.d/hooks/google-chrome-cedilla.hook
-   yay -S google-chrome   # reversão segura a partir de .orig após upgrades
+   sudo ./scripts/google-chrome-cedilla/uninstall.sh
    ```
+
+   Ele remove hook e backups, e só remove o script compartilhado se não houver
+   hook do electron instalado. A reversão garantida do binário continua sendo
+   reinstalar o pacote:
 
    O backup `.orig` é confiável apenas para a versão na qual foi criado
    (o script o recria quando o binário muda). Para reverter na mesma versão:
@@ -82,6 +85,8 @@ Após um upgrade do `google-chrome`, verifique com o teste acima. Se
 
 ## Arquivos
 
+- `install.sh` — verificação de necessidade + instalação (script compartilhado + hook) + aplicação do patch.
+- `uninstall.sh` — remoção do hook/backups (script compartilhado só se não houver hook do electron).
 - `README.md` — este documento (estado atual + plano de regressão).
 - `google-chrome-cedilla.hook` — hook do pacman (`Target = google-chrome`),
   pronto para uso caso uma versão futura retorne o padrão `c → ć`.
