@@ -30,6 +30,22 @@ PanelWindow {
         bottom: true
     }
 
+    // While a popup is open it owns the keyboard (same pattern as the
+    // Launcher): exclusive focus lets the Escape shortcut below fire no
+    // matter which app window was focused before. On close the focus goes
+    // back to whatever the compositor had. We never close on focus LOSS —
+    // that used to kill popups mid-interaction (see note above).
+    WlrLayershell.keyboardFocus: root.isOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+    // Esc closes the popup. A window-level Shortcut (not Keys on a focused
+    // item) works regardless of which control inside the popup has focus —
+    // including the NetworkPopup's PSK TextField.
+    Shortcut {
+        sequence: "Escape"
+        enabled: root.isOpen
+        onActivated: root.close()
+    }
+
     function open() {
         PopupManager.requestOpen(root);
         root.isOpen = true;
