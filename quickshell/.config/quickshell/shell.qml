@@ -138,4 +138,18 @@ ShellRoot {
             launcher.toggle();
         }
     }
+
+    // Called by the non-consuming Esc bind (see keybindings.lua). Popups and
+    // the About window take no keyboard focus, so Esc reaches the compositor
+    // instead of them. No-op when nothing is open.
+    IpcHandler {
+        target: "popup"
+
+        function closeActive() {
+            if (PopupManager.current !== null)
+                PopupManager.current.close();
+            if (aboutWindow.isOpen)
+                aboutWindow.close();
+        }
+    }
 }

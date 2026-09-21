@@ -4,6 +4,13 @@
 
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
+-- Quickshell actions
+-- Esc closes the active bar popup / About window via Quickshell IPC.
+-- Popups take no keyboard focus (exclusive layer focus would make Hyprland
+-- swallow all pointer input while one is open), so the bind is
+-- non_consuming: Esc still reaches the focused app when nothing is open.
+hl.bind("Escape", hl.dsp.exec_raw("qs ipc call popup closeActive"), { non_consuming = true })
+
 -- Applications
 hl.bind(mainMod .. " + Q", hl.dsp.exec_raw("ghostty"))
 hl.bind(mainMod .. " + B", hl.dsp.exec_raw("firefox"))

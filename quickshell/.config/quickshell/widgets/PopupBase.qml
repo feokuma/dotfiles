@@ -22,28 +22,18 @@ PanelWindow {
     // Fullscreen invisible window catches every click (closes the popup)
     // while the card consumes clicks inside it. No HyprlandFocusGrab: the
     // compositor re-evaluating focus used to close popups mid-interaction.
+    // No WlrKeyboardFocus.Exclusive either: Hyprland routes ALL pointer
+    // events to an exclusive-focus layer surface (even outside its input
+    // region), which froze the bar and blocked opening another popup while
+    // one was open. Popups therefore take no keyboard focus; Esc closing is
+    // handled by a non-consuming global bind that calls the shell's IPC
+    // (see keybindings.lua + shell.qml IpcHandler "popup").
     exclusiveZone: -1
     anchors {
         top: true
         left: true
         right: true
         bottom: true
-    }
-
-    // While a popup is open it owns the keyboard (same pattern as the
-    // Launcher): exclusive focus lets the Escape shortcut below fire no
-    // matter which app window was focused before. On close the focus goes
-    // back to whatever the compositor had. We never close on focus LOSS —
-    // that used to kill popups mid-interaction (see note above).
-    WlrLayershell.keyboardFocus: root.isOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-
-    // Esc closes the popup. A window-level Shortcut (not Keys on a focused
-    // item) works regardless of which control inside the popup has focus —
-    // including the NetworkPopup's PSK TextField.
-    Shortcut {
-        sequence: "Escape"
-        enabled: root.isOpen
-        onActivated: root.close()
     }
 
     function open() {

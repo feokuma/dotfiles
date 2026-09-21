@@ -225,17 +225,9 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell:about"
 
-    // While open the window owns the keyboard (same pattern as the
-    // Launcher/PopupBase) so Escape below fires no matter what was focused.
-    WlrLayershell.keyboardFocus: root.isOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-
-    // Esc closes the window; a window-level Shortcut works regardless of
-    // which control inside has focus.
-    Shortcut {
-        sequence: "Escape"
-        enabled: root.isOpen
-        onActivated: root.close()
-    }
+    // No exclusive keyboard focus: it would make Hyprland route all pointer
+    // events here (see PopupBase). Esc closing is handled by the global
+    // non-consuming bind calling the shell's IPC ("popup" target).
 
     function open() {
         root.isOpen = true;
