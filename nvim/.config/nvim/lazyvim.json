@@ -1,6 +1,9 @@
 {
   "extras": [
+    "lazyvim.plugins.extras.dap.core",
+    "lazyvim.plugins.extras.lang.dotnet",
     "lazyvim.plugins.extras.lang.go",
+    "lazyvim.plugins.extras.test.core",
     "lazyvim.plugins.extras.util.mini-hipatterns"
   ],
   "install_version": 8,
