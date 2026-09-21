@@ -50,19 +50,19 @@ sudo python3 scripts/electron-cedilla/electron-cedilla-patch.py
 
 Depois feche o VS Code completamente (processo inteiro, não só a janela) e teste `' + c`.
 
-### Persistir entre upgrades
-
-O binário é sobrescrito a cada upgrade de `electron42`. Para reaplicar
-automaticamente, instale o hook do pacman (o `Exec` chama o script instalado em
-`/usr/local/bin`):
+### Instalar (aplica + persiste entre upgrades) — via script
 
 ```bash
-sudo install -Dm755 scripts/electron-cedilla/electron-cedilla-patch.py /usr/local/bin/
-sudo install -Dm644 scripts/electron-cedilla/electron-cedilla.hook /etc/pacman.d/hooks/electron42-cedilla.hook
-sudo python3 /usr/local/bin/electron-cedilla-patch.py /usr/lib/electron42/electron
+sudo ./scripts/electron-cedilla/install.sh
 ```
 
-O hook dispara em `Install`/`Upgrade` de `electron42` (`PostTransaction`).
+O script instala o patch em `/usr/local/bin`, o hook em `/etc/pacman.d/hooks/`
+e aplica o patch. Usa `ELECTRON_VER=42` por padrão; se o pacote do sistema
+mudar de versão (electron43...), rode:
+
+```bash
+sudo ELECTRON_VER=43 ./scripts/electron-cedilla/install.sh
+```
 
 ### Verificar
 
@@ -71,12 +71,13 @@ python3 /usr/local/bin/electron-cedilla-patch.py /usr/lib/electron42/electron
 # → "[ok] already patched (nothing to do)."
 ```
 
-### Desfazer
+### Desfazer — via script
 
 ```bash
-sudo rm /etc/pacman.d/hooks/electron42-cedilla.hook /usr/local/bin/electron-cedilla-patch.py
-sudo pacman -S electron42
+sudo ./scripts/electron-cedilla/uninstall.sh
 ```
+
+Ele remove hook e script. Reversão segura do binário:
 
 Reinstalar o pacote é a reversão segura após upgrades: o backup `.orig` só é
 confiável para a versão na qual foi criado — após um upgrade, `electron.orig`
@@ -93,3 +94,5 @@ sudo cp -a /usr/lib/electron42/electron.orig /usr/lib/electron42/electron
 
 - `electron-cedilla-patch.py` — script de patch (idempotente, com backups).
 - `electron-cedilla.hook` — hook do pacman para reaplicar após upgrades de `electron42`.
+- `install.sh` / `uninstall.sh` — instalador/desinstalador (versão parametrizável via `ELECTRON_VER`).
+- `LICENSE` — MIT, do projeto upstream [chromium-wayland-cedilla-fix](https://github.com/lcassa/chromium-wayland-cedilla-fix), do qual este script é derivado.
