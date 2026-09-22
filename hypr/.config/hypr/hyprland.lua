@@ -11,3 +11,6 @@ require("wallpaper")
 require("windowrules")
 require("keybindings")
 require("autostart")
+
+-- HyprMod managed settings
+require("hyprland-gui")
