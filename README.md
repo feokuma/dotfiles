@@ -11,6 +11,7 @@ completos.
 | Componente | Escolha |
 | --- | --- |
 | Compositor | Hyprland (configuração em **Lua**) |
+| Configurações | [hyprmod](https://github.com/BlueManCZ/hyprmod) (GUI GTK4/libadwaita, AUR) |
 | Shell gráfico | Quickshell (QML em `.config/quickshell/`) |
 | Editor | Neovim + LazyVim (`.config/nvim/`, com LSP QML) |
 | Terminal | Ghostty |
@@ -27,6 +28,9 @@ Programas padrão do Hyprland (`hypr/.config/hypr/programs.lua`):
 | Navegador | firefox |
 | Arquivos | dolphin |
 | Launcher | hyprlauncher |
+
+A stack inclui também **hyprmod** (AUR), uma GUI nativa GTK4/libadwaita para
+alterar configurações do Hyprland pelo ícone/launcher.
 
 ## Estrutura
 
@@ -51,10 +55,20 @@ cada arquivo cuida de uma parte: `monitors`, `input`, `environment`,
 `look-and-feel`, `windows-and-workspaces`, `keybindings`, `autostart`,
 `programs`, `permissions`, `misc`).
 
+Configurações alteradas via **hyprmod** são escritas pelo app em
+`hypr/.config/hypr/hyprland-gui.lua`, que é carregado no fim do
+`hyprland.lua` (`require("hyprland-gui")`). O arquivo começa vazio e é
+mantido no repositório para preservar as alterações feitas pela GUI entre
+máquinas/recarregamentos.
+
 ## Pré-requisitos
+
+Pré-requisitos:
 
 - Arch Linux
 - Hyprland
+- **`hyprmod`** (AUR) — GUI de configurações do Hyprland (GTK4/libadwaita);
+  grava as alterações em `hyprland-gui.lua` (`yay -S hyprmod`)
 - Quickshell (`quickshell` via AUR/yay) + Qt6 (`qt6-declarative` traz
   `qmlls`, `qmlformat`, `qmllint` em `/usr/lib/qt6/bin/`)
 - Neovim (`neovim`, `ripgrep`; opcional `fd`)
