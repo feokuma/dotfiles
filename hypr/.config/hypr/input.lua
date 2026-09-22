@@ -10,8 +10,10 @@ hl.config({
 
 		touchpad = {
 			natural_scroll = true,
-			tap_to_click = false,
 			scroll_factor = 0.1,
+			-- Firmware não reporta pressão/tamanho de contato, então libinput
+			-- não consegue detectar palmas; DWT mitiga palmas enquanto digita.
+			disable_while_typing = true,
 		},
 	},
 })
