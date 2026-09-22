@@ -27,7 +27,6 @@ Pill {
     property int rawBrightness: 0
     property int maxBrightness: 0
     property bool brightnessReady: false
-    property bool maxReady: false
 
     // Scroll smoothing — shared via utils/ScrollHandler (threshold 120).
 
@@ -110,11 +109,9 @@ Pill {
         watchChanges: false
         blockLoading: true
         onLoaded: {
-            root.maxReady = true;
             root.maxBrightness = root.parseIntSafe(maxFile.text());
         }
         onLoadFailed: {
-            root.maxReady = false;
             root.maxBrightness = 0;
         }
     }

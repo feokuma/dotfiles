@@ -53,7 +53,6 @@ QtObject {
     readonly property int notificationSpacing: 4
     readonly property int notificationStackSpacing: 10
     readonly property int notificationTimeoutSec: 5  // fallback for expireTimeout <= 0
-    readonly property int notificationMaxVisible: 5
 
     // About window ("About this system", opened from the power menu).
     // Padding keeps the info rows off the card edges. The full card width

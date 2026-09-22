@@ -1,7 +1,5 @@
 import Quickshell
-import Quickshell.Wayland
 import QtQuick
-import "../theme"
 import "../utils"
 
 // Contract + scaffolding shared by all bar popups (Audio / Bluetooth /
