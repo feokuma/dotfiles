@@ -1,0 +1,10 @@
+# SVG preview. Uses the `svgx` plugin (rsvg-convert) because the built-in `svg`
+# previewer needs `resvg`, which is not installed. The run name "svgx" must not
+# be "svg" — that name is shadowed by the built-in preset plugin.
+[plugin]
+prepend_previewers = [
+	{ mime = "image/svg+xml", run = "svgx" },
+]
+prepend_preloaders = [
+	{ mime = "image/svg+xml", run = "svgx" },
+]
