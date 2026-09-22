@@ -28,7 +28,7 @@ PopupBase {
     color: "transparent"
     // Backdrop model lives on PopupBase (fullscreen catcher + no focus grab);
     // only appearance stays here.
-    margins.top: Theme.barHeight + 6
+    margins.top: Theme.barHeight + Theme.popupBarGap
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell:audio-popup"
@@ -41,8 +41,6 @@ PopupBase {
 
     // Rounded card, opaque like the launcher (pill opacity would wash
     // the border out).
-    readonly property int popupPadding: 14
-    readonly property int popupWidth: 350
 
     Rectangle {
         id: panel
@@ -52,7 +50,7 @@ PopupBase {
             right: parent.right
             rightMargin: Theme.barMargin
         }
-        width: root.popupWidth
+        width: Theme.popupWidth
         height: content.implicitHeight + content.anchors.margins * 2
         radius: Theme.pillRadius
         color: Theme.pillBackground
@@ -89,10 +87,10 @@ PopupBase {
 
             anchors.fill: parent
             anchors.margins: 2
-            topPadding: root.popupPadding
-            bottomPadding: root.popupPadding
-            leftPadding: root.popupPadding
-            rightPadding: root.popupPadding
+            topPadding: Theme.popupPadding
+            bottomPadding: Theme.popupPadding
+            leftPadding: Theme.popupPadding
+            rightPadding: Theme.popupPadding
             spacing: 10
 
             Text {
