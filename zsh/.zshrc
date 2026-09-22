@@ -14,6 +14,9 @@ setopt hist_ignore_space    # commands starting with " " aren't saved
 setopt hist_reduce_blanks   # strip redundant whitespace
 setopt hist_verify          # !! expands on enter for review before execution
 
+# Load local secrets (not versioned)
+[[ -f ~/.config/zsh/secrets.zsh ]] && source ~/.config/zsh/secrets.zsh
+
 # Default editor (used by yazi, git, fzf, etc.)
 export EDITOR="nvim"
 export VISUAL="nvim"
