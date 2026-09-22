@@ -9,6 +9,21 @@ Pill {
 
     width: clockText.width + Theme.pillPaddingH
 
+    // Calendar popup attached by shell.qml; clicks toggle it (see Network.qml).
+    property var popup: null
+
+    MouseArea {
+        id: hoverArea
+
+        anchors.fill: parent
+        hoverEnabled: true
+        acceptedButtons: Qt.LeftButton
+        onClicked: {
+            if (root.popup)
+                root.popup.toggle();
+        }
+    }
+
     SystemClock {
         id: systemClock
         precision: SystemClock.Minutes

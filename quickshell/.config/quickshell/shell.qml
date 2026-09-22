@@ -56,7 +56,9 @@ ShellRoot {
         }
 
         Clock {
+            id: clock
             anchors.centerIn: parent
+            popup: calendarPopup
         }
 
         RowLayout {
@@ -114,6 +116,10 @@ ShellRoot {
         id: networkPopup
     }
 
+    CalendarPopup {
+        id: calendarPopup
+    }
+
     Launcher {
         id: launcher
     }
@@ -136,6 +142,14 @@ ShellRoot {
 
         function toggleLauncher() {
             launcher.toggle();
+        }
+    }
+
+    IpcHandler {
+        target: "calendar"
+
+        function toggleCalendar() {
+            calendarPopup.toggle();
         }
     }
 
