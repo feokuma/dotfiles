@@ -189,7 +189,8 @@ PopupWindow {
             font.pixelSize: Theme.fontSize - 1
             font.family: Theme.fontFamily
             font.bold: Theme.fontBold
-            color: Theme.text
+            // Same color as the bubble border so hint text and outline match.
+            color: root.accent
         }
     }
 }
