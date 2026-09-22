@@ -24,6 +24,15 @@ Pill {
         }
     }
 
+    // Full (locale) date shown as a tooltip while hovering, same pattern
+    // as Network.qml's HoverHint.
+    HoverHint {
+        target: root
+        text: hoverArea.containsMouse
+            ? Qt.formatDate(systemClock.date, "dddd, d MMMM yyyy") : ""
+        accent: Theme.peach
+    }
+
     SystemClock {
         id: systemClock
         precision: SystemClock.Minutes
