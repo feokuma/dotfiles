@@ -264,7 +264,7 @@ PanelWindow {
                     anchors.fill: parent
                     acceptedButtons: Qt.NoButton // clicks must reach the discs
                     hoverEnabled: false
-                    onWheel: (wheel) => carousel.feedSwipe(wheel.angleDelta.y)
+                    onWheel: (wheel) => carousel.feedSwipe(wheel.angleDelta.x)
                 }
 
                 // Selected (centered) disc; defaults to the current wallpaper
@@ -298,11 +298,10 @@ PanelWindow {
                         root.apply(path);
                 }
 
-                // Two-finger swipe accumulator. Up/natural-scroll-forward
-                // (positive delta) moves to the next wallpaper on the right,
-                // mirroring the compositor gesture direction. One step per
-                // wheel-notch: a flick may emit several events, so the
-                // leftover delta carries over between steps.
+                // Two-finger swipe accumulator on the horizontal axis:
+                // swiping right moves the selection to the next (right)
+                // wallpaper. One step per wheel-notch (120): a flick may
+                // emit several events, so leftover delta carries over.
                 property real swipeAccum: 0
 
                 function feedSwipe(delta) {
