@@ -166,9 +166,8 @@ PanelWindow {
         radius: Theme.pillRadius
         border.width: 1
         border.color: Theme.highlight
-        // Fixed card shape: the folder is local and fast, and a growing card
-        // on first open reads as flicker rather than animation.
-        clip: true
+        // No outer clip: discs may pass the interior clip edge freely, but a
+        // dedicated clip item below keeps them off the border line.
 
         opacity: root.isOpen ? 1 : 0
 
@@ -181,8 +180,18 @@ PanelWindow {
             }
         }
 
-        Column {
-            id: content
+        // Interior clip: cuts overflowing carousel discs 1px inside the frame
+        // so the border line always stays visible (the panel itself cannot
+        // clip without the discs painting over its own border).
+        Item {
+            id: clipBox
+
+            anchors.fill: parent
+            anchors.margins: 1
+            clip: true
+
+            Column {
+                id: content
 
             anchors.fill: parent
             anchors.margins: 2
@@ -417,6 +426,7 @@ PanelWindow {
                         }
                     }
                 }
+            }
             }
         }
     }
