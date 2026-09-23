@@ -12,4 +12,8 @@ hl.config({
         gaps_in = 2,
         gaps_out = 2,
     },
+    misc = {
+        disable_hyprland_logo = true,
+        disable_splash_rendering = true,
+    },
 })
