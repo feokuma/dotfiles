@@ -151,7 +151,17 @@ PanelWindow {
 
         anchors.centerIn: parent
         width: Math.min(Math.max(parent.width * 0.5, 640), 960)
-        height: Math.min(parent.height - 160, 720)
+        // Inner width seen by content children: Column margins (2+2) plus
+        // the Column's own l/r paddings (14+14).
+        readonly property int innerWidth: width - 32
+        // Height hugs the centered disc: paddings + header + gap + carousel.
+        // 1.05x headroom: the side fan sits lower/smaller, so only a thin
+        // margin is needed before clipping.
+        height: content.topPadding
+            + content.bottomPadding
+            + content.headerHeight
+            + content.spacing
+            + innerWidth * 0.52 * 0.62 * 1.05
         color: Theme.pillBackground
         radius: Theme.pillRadius
         border.width: 1
