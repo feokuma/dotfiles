@@ -264,8 +264,10 @@ PanelWindow {
                     anchors.fill: parent
                     acceptedButtons: Qt.NoButton // clicks must reach the discs
                     hoverEnabled: false
-                    onWheel: (wheel) => carousel.feedSwipe(wheel.angleDelta.x)
-                }
+                    // Sign inverted: the touchpad runs natural scrolling, so
+                    // a physical rightward swipe arrives as a negative x
+                    // delta and must map to selectNext().
+                    onWheel: (wheel) => carousel.feedSwipe(-wheel.angleDelta.x)                }
 
                 // Selected (centered) disc; defaults to the current wallpaper
                 // so the picker opens on what's already applied.
@@ -299,9 +301,10 @@ PanelWindow {
                 }
 
                 // Two-finger swipe accumulator on the horizontal axis:
-                // swiping right moves the selection to the next (right)
-                // wallpaper. One step per wheel-notch (120): a flick may
-                // emit several events, so leftover delta carries over.
+                // physical swiping right (natural-scroll adjusted) moves the
+                // selection to the next (right) wallpaper. One step per
+                // wheel-notch (120): a flick may emit several events, so
+                // leftover delta carries over.
                 property real swipeAccum: 0
 
                 function feedSwipe(delta) {
