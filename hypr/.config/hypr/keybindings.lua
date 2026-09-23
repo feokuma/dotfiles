@@ -123,14 +123,21 @@ hl.bind("CTRL + SHIFT + Print", hl.dsp.exec_cmd("slurp | grim -g - - | wl-copy")
 -- Lid switch
 -- Hyprland owns the lid event: greetd launches the session wrapped in
 -- `systemd-inhibit --what=handle-lid-switch`, so logind ignores the lid
--- while Hyprland runs. On lid close: lock first, then suspend (same
--- path as the idle pipeline in hypridle.conf). Lid open needs no bind:
--- any close implies a previous suspend, whose resume is handled by
--- hypridle (after_sleep_cmd + on-resume listener).
+-- while Hyprland runs.
+-- Closed with an external monitor connected: internal panel (eDP-1) is
+-- turned off only and Hyprland migrates its workspaces to the external
+-- monitor; the session keeps running (dock mode).
+-- Closed without external monitor: lock + suspend (lidclose.sh "closed"
+-- falls back to the idle pipeline path). Lid open re-enables the
+-- internal panel (no-op when already on / after dock-undock).
 hl.bind(
 	"switch:on:Lid Switch",
-	hl.dsp.exec_cmd("pidof hyprlock || hyprlock; sleep 0.5; systemctl suspend"),
+	hl.dsp.exec_cmd("~/.config/hypr/scripts/lid-switch.sh closed"),
 	{ locked = true }
+)
+hl.bind(
+	"switch:off:Lid Switch",
+	hl.dsp.exec_cmd("~/.config/hypr/scripts/lid-switch.sh open")
 )
 
 -- Session / power
