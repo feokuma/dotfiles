@@ -7,4 +7,4 @@ Target = google-chrome
 [Action]
 Description = Reapplying ' + c -> ç compose patch to the Google Chrome binary...
 When = PostTransaction
-Exec = /usr/bin/python3 /usr/local/bin/electron-cedilla-patch.py /opt/google/chrome/chrome
+Exec = /usr/bin/python3 /usr/local/bin/chromium-cedilla-patch.py /opt/google/chrome/chrome
