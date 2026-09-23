@@ -73,7 +73,7 @@ PanelWindow {
     function open() {
         refreshCurrentPath();
         root.isOpen = true;
-        thumbGrid.forceActiveFocus();
+        carousel.forceActiveFocus();
     }
 
     function close() {
@@ -204,7 +204,7 @@ PanelWindow {
                 Text {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Click to apply"
+                    text: "←/→ select · Enter/click apply · Esc close"
                     color: Theme.textMuted
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize - 2
@@ -212,68 +212,199 @@ PanelWindow {
                 }
             }
 
-            GridView {
-                id: thumbGrid
+            // Carousel (iTunes "Cover Flow" style): the selected thumbnail
+            // sits centered and scaled up; neighbors recede to the sides.
+            // A Repeater with explicit per-offset geometry instead of
+            // PathView: the collection is small, deterministic placement is
+            // easy to reason about, and no flick physics is wanted here.
+            Item {
+                id: carousel
 
-                // Keyboard focus lives on the grid itself; Esc closes.
+                // Keyboard focus lives on the carousel; arrows move the
+                // selection, Enter applies it, Esc closes.
                 Keys.onEscapePressed: root.close()
+                Keys.onLeftPressed: carousel.selectPrevious()
+                Keys.onRightPressed: carousel.selectNext()
+                Keys.onReturnPressed: carousel.applySelected()
+                Keys.onEnterPressed: carousel.applySelected()
 
                 width: content.width - content.leftPadding - content.rightPadding
                 // Header row + its gap are already part of the Column's
-                // layout; the grid takes what's left inside the card.
+                // layout; the carousel takes what's left inside the card.
                 height: parent.height - parent.topPadding - parent.bottomPadding - content.headerHeight - content.spacing
-                clip: true
-                model: folderModel
+                clip: false // scaled discs must be allowed to overflow slightly
 
-                // Grid card metrics: three columns with a fixed gap; a
-                // named property instead of a bare `spacing` reference so
-                // the cell math never resolves against the wrong scope.
-                readonly property int gridSpacing: 10
-                cellWidth: (width - gridSpacing * 2) / 3
-                cellHeight: Math.round(cellWidth * 0.62) // 16:10-ish card shape
+                // Selected (centered) disc; defaults to the current wallpaper
+                // so the picker opens on what's already applied.
+                property int selectedIndex: 0
+                property bool initialized: false
 
-                delegate: Rectangle {
-                    id: thumbFrame
+                readonly property int count: folderModel.count
 
-                    required property url fileUrl
-                    required property string fileName
+                // Geometry ramp per |offset| from the center disc (index
+                // 0 = center). Anything past the visible fan fades out.
+                // Cover Flow feel: nearest neighbors large and close, then
+                // the row flattens out.
+                readonly property real centerScale: 1.0
+                readonly property real sideScale: 0.62
+                readonly property real farScale: 0.45
 
-                    // "Current" ring: conf path vs the thumb's local path.
-                    // Both sides end in the same absolute path (conf stores
-                    // absolute paths written by this picker or the user).
-                    readonly property string localPath: fileUrl.toString().replace("file://", "")
-                    readonly property bool isCurrent: root.currentWallpaperPath !== ""
-                        && localPath.endsWith(root.currentWallpaperPath.replace(/^~/, (Quickshell.env("HOME") ?? "")))
+                function selectNext() {
+                    if (carousel.selectedIndex < carousel.count - 1)
+                        carousel.selectedIndex += 1;
+                }
 
-                    width: thumbGrid.cellWidth
-                    height: thumbGrid.cellHeight
+                function selectPrevious() {
+                    if (carousel.selectedIndex > 0)
+                        carousel.selectedIndex -= 1;
+                }
 
-                    radius: Theme.pillRadius - 3
-                    color: Theme.crust
-                    clip: true
-                    border.width: isCurrent ? 2 : hover.containsMouse ? 1 : 0
-                    border.color: isCurrent ? Theme.accent : Theme.highlight
+                function applySelected() {
+                    const path = carousel.paths[carousel.selectedIndex];
+                    if (path)
+                        root.apply(path);
+                }
 
-                    // Small decode buffer: bounding sourceSize keeps huge
-                    // originals from ballooning memory in the thumb grid.
-                    Image {
-                        anchors.fill: parent
-                        anchors.margins: 1
-                        sourceSize.width: 420
-                        sourceSize.height: 264
-                        source: thumbFrame.fileUrl
-                        asynchronous: true
-                        fillMode: Image.PreserveAspectCrop
-                        smooth: true
-                    }
+                // Local paths reported by the delegates as they resolve; the
+                // model supports no direct `get()`, so this suffices.
+                property var paths: ([])
 
-                    MouseArea {
-                        id: hover
+                // Offset-dependent geometry — one chart, both sides sign-flipped.
+                readonly property int visualRange: 2 // discs shown per side
 
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.apply(thumbFrame.localPath)
+                function xFor(offset) {
+                    // Fan-out spacing: near discs closer than edge discs.
+                    const mag = Math.min(Math.abs(offset), carousel.visualRange);
+                    const step = mag === 0 ? 0
+                        : mag === 1 ? carousel.width * 0.34
+                        : carousel.width * 0.46;
+                    return carousel.width / 2 + Math.sign(offset) * step;
+                }
+
+                function scaleFor(offset) {
+                    const mag = Math.min(Math.abs(offset), carousel.visualRange);
+                    return mag === 0 ? carousel.centerScale
+                        : mag === 1 ? carousel.sideScale
+                        : carousel.farScale;
+                }
+
+                function yFor(offset) {
+                    // Laterals sit a touch lower, like the iTunes stack.
+                    const mag = Math.min(Math.abs(offset), carousel.visualRange);
+                    return mag === 0 ? 0 : mag === 1 ? 14 : 26;
+                }
+
+                function opacityFor(offset) {
+                    const mag = Math.abs(offset);
+                    return mag > carousel.visualRange ? 0
+                        : mag === 0 ? 1.0
+                        : mag === 1 ? 0.9
+                        : 0.55;
+                }
+
+                Repeater {
+                    model: folderModel
+
+                    delegate: Item {
+                        id: disc
+
+                        required property url fileUrl
+                        required property string fileName
+                        required property int index
+
+                        // Signed distance from the selected disc.
+                        readonly property int offset: index - carousel.selectedIndex
+
+                        readonly property string localPath: fileUrl.toString().replace("file://", "")
+                        readonly property bool isSelected: offset === 0
+                        readonly property bool isApplied: root.currentWallpaperPath !== ""
+                            && localPath.endsWith(root.currentWallpaperPath.replace(/^~/, (Quickshell.env("HOME") ?? "")))
+
+                        // Register the resolved local path (no model get())
+                        // and center the applied wallpaper on first open.
+                        Component.onCompleted: {
+                            carousel.paths[index] = localPath;
+                            if (!carousel.initialized && isApplied) {
+                                carousel.selectedIndex = index;
+                                carousel.initialized = true;
+                            }
+                        }
+
+                        width: carousel.width * 0.52
+                        height: width * 0.62
+
+                        // iTunes-style geometry, animated so a selection
+                        // change slides the whole fan smoothly.
+                        x: carousel.xFor(offset) - disc.width / 2
+                        y: parent.height / 2 - disc.height / 2 + carousel.yFor(offset)
+                        z: 20 - Math.min(Math.abs(offset), 10) * 2
+                        scale: carousel.scaleFor(offset)
+                        opacity: carousel.opacityFor(offset)
+
+                        Behavior on x {
+                            NumberAnimation {
+                                duration: Theme.animSlow
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+
+                        Behavior on y {
+                            NumberAnimation {
+                                duration: Theme.animSlow
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+
+                        Behavior on scale {
+                            NumberAnimation {
+                                duration: Theme.animSlow
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: Theme.animSlow
+                            }
+                        }
+
+                        Rectangle {
+                            id: frame
+
+                            anchors.fill: parent
+                            radius: Theme.pillRadius - 3
+                            color: Theme.crust
+                            clip: true
+                            border.width: isApplied ? 2 : disc.isSelected ? 2 : hover.containsMouse ? 1 : 0
+                            border.color: isApplied ? Theme.accent : Theme.highlight
+
+                            // Small decode buffer: bounding sourceSize keeps
+                            // huge originals from ballooning memory.
+                            Image {
+                                anchors.fill: parent
+                                anchors.margins: 1
+                                sourceSize.width: 640
+                                sourceSize.height: 400
+                                source: disc.fileUrl
+                                asynchronous: true
+                                fillMode: Image.PreserveAspectCrop
+                                smooth: true
+                            }
+
+                            MouseArea {
+                                id: hover
+
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (disc.isSelected)
+                                        root.apply(disc.localPath);
+                                    else
+                                        carousel.selectedIndex = disc.index;
+                                }
+                            }
+                        }
                     }
                 }
             }
