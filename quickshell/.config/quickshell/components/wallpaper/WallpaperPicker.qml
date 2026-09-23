@@ -55,14 +55,6 @@ PanelWindow {
         sedProcess.running = true;
     }
 
-    function notify(path) {
-        // Hyprland's built-in notification as an ack; the shell has no toast
-        // component of its own yet.
-        Quickshell.execDetached({
-            command: ["hyprctl", "notify", "-1", "2500", "1", "wallpaper: " + path.split("/").pop()],
-        });
-    }
-
     function refreshCurrentPath() {
         // Tolerate cold open: an unloaded conf yields "" (no ring that
         // time); the `loaded` signal refreshes it as soon as it arrives.
@@ -117,7 +109,6 @@ PanelWindow {
                 });
             }
             root.persist(path);
-            root.notify(path);
             root.currentWallpaperPath = path;
             root.pendingPath = "";
             root.close();
