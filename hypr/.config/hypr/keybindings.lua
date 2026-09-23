@@ -20,6 +20,9 @@ hl.bind(mainMod .. " + B", hl.dsp.exec_raw("firefox"))
 -- so no new shell process is spawned.
 hl.bind("ALT + Space", hl.dsp.exec_raw("qs ipc call launcher toggleLauncher"))
 
+-- Wallpaper picker with preview thumbnails (Quickshell popup).
+hl.bind(mainMod .. " + W", hl.dsp.exec_raw("qs ipc call wallpaper toggleWallpaper"))
+
 hl.bind("ALT + F4", hl.dsp.window.close())
 -- Float to fullscreen: SUPER+F toggles floating, F11 toggles fullscreen.
 -- SUPER+V is kept as a float alias.
