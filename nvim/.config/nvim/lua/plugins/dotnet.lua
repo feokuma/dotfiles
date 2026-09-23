@@ -4,9 +4,9 @@
 -- (o equivalente ao `:LazyExtras`; declarar extras aqui em `plugins/`
 -- quebraria a ordem de imports do LazyVim):
 --   - `dap.core`: nvim-dap + dap-ui + virtual text + keybindings <leader>d*
---   - `lang.dotnet`: omnisharp (LSP, Roslyn analyzers, organize imports),
---       omnisharp-extended-lsp (gd via .sln), netcoredbg, csharpier,
---       treesitter c_sharp, neotest-vstest
+--   - `lang.dotnet`: extra oficial (treesitter c_sharp, netcoredbg, csharpier,
+--       neotest-vstest). O LSP usado é o Roslyn (roslyn_ls), configurado
+--       abaixo; o OmniSharp do extra fica desativado.
 --   - `test.core`: neotest + keybindings <leader>t*
 --
 -- Este arquivo segue o padrão de `go.lua`: adiciona apenas o que os
@@ -32,6 +32,28 @@ local function setup_dap()
 
   local configs = dap.configurations.cs or {}
 
+  --- Localiza o .csproj do projeto do buffer atual.
+  local function projeto_atual()
+    return vim.fs.find(function(name)
+      return name:match("%.csproj$") ~= nil
+    end, { upward = true, path = vim.fs.dirname(vim.api.nvim_buf_get_name(0)) })[1]
+  end
+
+  --- Resolve a dll do projeto do buffer atual:
+  --- <proj>/bin/Debug/<tfm>/<AssemblyName>.dll
+  local function dll_do_projeto()
+    local project = projeto_atual()
+    if not project then
+      return nil
+    end
+    return vim.fn.glob(
+      vim.fs.dirname(project)
+        .. "/bin/Debug/**/"
+        .. vim.fn.fnamemodify(project, ":t:r")
+        .. ".dll"
+    )
+  end
+
   local function has(name)
     for _, c in ipairs(configs) do
       if c.name == name then
@@ -49,15 +71,8 @@ local function setup_dap()
       program = function()
         -- Localiza a dll do projeto acima do buffer atual:
         -- <proj>/bin/Debug/<tfm>/<AssemblyName>.dll
-        local project = vim.fs.find(function(name)
-          return name:match("%.csproj$") ~= nil
-        end, { upward = true, path = vim.fs.dirname(vim.api.nvim_buf_get_name(0)) })[1]
-        if not project then
-          vim.notify("Nenhum .csproj encontrado acima do buffer atual.", vim.log.levels.ERROR)
-          return nil
-        end
-        local dll = vim.fn.glob(vim.fs.dirname(project) .. "/bin/Debug/**/" .. vim.fn.fnamemodify(project, ":t:r") .. ".dll")
-        if dll == "" then
+        local dll = dll_do_projeto()
+        if dll == "" or dll == nil then
           vim.notify("Dll não encontrada — rode `dotnet build` antes de debugar.", vim.log.levels.ERROR)
           return nil
         end
@@ -78,22 +93,55 @@ local function setup_dap()
   end
 
   dap.configurations.cs = configs
+
+  -- <leader>dd: compila o projeto do buffer atual (se necessário) e lança
+  -- o Debugger direto, sem picker nem pedir dll a mao. E o atalho de
+  -- "uma tecla para debugar" da palestra.
+  vim.keymap.set("n", "<leader>dd", function()
+    local dap = require("dap")
+    local config = vim.tbl_filter(function(c)
+      return c.name == "Launch dll (build current project)"
+    end, dap.configurations.cs or {})[1]
+    if not config then
+      vim.notify("Config 'Launch dll (build current project)' não registrada.", vim.log.levels.ERROR)
+      return
+    end
+
+    local dll = dll_do_projeto()
+    if dll ~= "" and dll ~= nil then
+      dap.run(config)
+      return
+    end
+
+    local project = projeto_atual()
+    if not project then
+      vim.notify("Nenhum .csproj encontrado acima do buffer atual.", vim.log.levels.ERROR)
+      return
+    end
+
+    vim.notify("Compilando " .. vim.fn.fnamemodify(project, ":t") .. " ...", vim.log.levels.INFO)
+    local resultado = vim.system({ "dotnet", "build", project }):wait()
+    if resultado.code ~= 0 then
+      vim.notify("dotnet build falhou — ver :messages", vim.log.levels.ERROR)
+      return
+    end
+    vim.notify("Build concluído. Debugando...", vim.log.levels.INFO)
+    dap.run(config)
+  end, { desc = "Debug: build + launch (projeto atual)" })
 end
 
 return {
-  -- LSP: ajustes omnisharp (o extra já configura analyzers, organize
-  -- imports e gd via .sln com omnisharp-extended-lsp).
+  -- LSP C#: Roslyn (servidor oficial da Microsoft). Muda do OmniSharp,
+  -- que esta fim-de-vida, com crash de inlay hints e sem suporte a
+  -- .slnx/.NET 10. O lspconfig `roslyn_ls` ja detecta .sln e .slnx.
   {
     "neovim/nvim-lspconfig",
     opts = {
       servers = {
-        omnisharp = {
-          -- Roslyn analyzers já habilitados pelo extra; reforçamos
-          -- análise em tempo de edição e suporte a load de projetos.
-          enable_editorconfig_support = true,
-          enable_ms_build_load_projects_on_demand = false,
-          analyze_open_documents_only = true,
-        },
+        -- Desativa o OmniSharp do extra lang.dotnet
+        omnisharp = { enabled = false },
+        -- Roslyn LSP: instalado/gerenciado pelo mason-lspconfig
+        roslyn_ls = {},
       },
     },
   },
@@ -110,12 +158,28 @@ return {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
     opts = function(_, opts)
       opts.ensure_installed = opts.ensure_installed or {}
-      local tools = { "netcoredbg", "csharpier" }
+      local tools = { "netcoredbg", "csharpier", "roslyn-language-server" }
       for _, tool in ipairs(tools) do
         if not vim.tbl_contains(opts.ensure_installed, tool) then
           table.insert(opts.ensure_installed, tool)
         end
       end
+    end,
+  },
+
+  -- Debug de testes: o neotest-vstest precisa saber que DAP deve usar
+  -- (netcoredbg). `<leader>td` (Debug Nearest, do extra test.core) lanca
+  -- o testhost do projetio de teste sob o netcoredbg — e ai sim os
+  -- breakpoints em arquivos de teste param.
+  {
+    "Nsidorenco/neotest-vstest",
+    init = function()
+      ---@type neotest_vstest.Config
+      vim.g.neotest_vstest = {
+        dap_settings = {
+          type = "netcoredbg",
+        },
+      }
     end,
   },
 
