@@ -2,142 +2,30 @@
 // Required by SystemTrayItem.display() / native tray menus — needs a full
 // quickshell restart (not just file-watch reload) to take effect.
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
-import QtQuick.Layouts
-import "components/about"
-import "components/bar"
-import "components/launcher"
-import "components/notifications"
+import "components/shell"
 import "components/wallpaper"
-import "theme"
-import "utils"
 
+// Global shell orchestrator.
+//
+// Per-monitor UI (bar, popups, launcher, About, notifications overlay) is
+// declared in components/shell/ScreenShell.qml and instantiated once per
+// connected screen via Variants. This file only owns truly singleton
+// things: the screen Variants itself, the WallpaperPicker and the IPC
+// handlers that route to the focused screen's instance.
 ShellRoot {
-    PanelWindow {
-        id: barWindow
+    // One ScreenShell per connected screen.
+    Variants {
+        id: screenVariants
 
-        color: "transparent"
-
-        anchors {
-            top: true
-            left: true
-            right: true
-        }
-
-        // Bar height and margin live in Theme (theme/Theme.qml).
-        implicitHeight: Theme.barHeight
-
-        // The popups' fullscreen click-outside catcher starts below the bar
-        // (margins.top), so bar clicks bypass it. This bar-level catcher,
-        // declared FIRST (under the pills' own MouseAreas), closes the open
-        // popup when the bar's free area is clicked; clicking a pill still
-        // goes to the pill (toggle/open) instead.
-        MouseArea {
-            anchors.fill: parent
-            enabled: PopupManager.current !== null
-            onClicked: PopupManager.current.close()
-        }
-
-        Row {
-            anchors {
-                left: parent.left
-                leftMargin: Theme.barMargin
-                verticalCenter: parent.verticalCenter
-            }
-            spacing: Theme.itemSpacing
-
-            HyprlandLogo {
-                id: hyprlandLogo
-                Layout.preferredWidth: width
-                popup: powerMenuPopup
-            }
-
-            Workspaces {}
-        }
-
-        Clock {
-            id: clock
-            anchors.centerIn: parent
-            popup: calendarPopup
-        }
-
-        RowLayout {
-            anchors {
-                right: parent.right
-                rightMargin: Theme.barMargin
-                verticalCenter: parent.verticalCenter
-            }
-            spacing: Theme.itemSpacing
-
-            Brightness {}
-
-            Tray {
-                parentWindow: barWindow
-                Layout.preferredWidth: width
-            }
-
-            Network {
-                id: network
-                Layout.preferredWidth: width
-                popup: networkPopup
-            }
-
-            Bluetooth {
-                id: bluetooth
-                Layout.preferredWidth: width
-                popup: bluetoothPopup
-            }
-
-            Audio {
-                id: audio
-                popup: audioPopup
-            }
-
-            Battery {
-                popup: powerProfilesPopup
-            }
-        }
+        model: Quickshell.screens
+        ScreenShell {}
     }
 
-    PowerProfilesPopup {
-        id: powerProfilesPopup
-    }
-
-    AudioPopup {
-        id: audioPopup
-        audioRef: audio
-    }
-
-    BluetoothPopup {
-        id: bluetoothPopup
-    }
-
-    NetworkPopup {
-        id: networkPopup
-    }
-
-    CalendarPopup {
-        id: calendarPopup
-    }
-
-    Launcher {
-        id: launcher
-    }
-
-    // Floating, centered "About this system" window, opened by the
-    // power menu's About row.
-    AboutWindow {
-        id: aboutWindow
-    }
-
-    PowerMenuPopup {
-        id: powerMenuPopup
-        aboutWindow: aboutWindow
-    }
-
-    Notifications {}
-
+    // The wallpaper picker is a single floating window; on toggle it is
+    // pointed at the focused monitor so SUPER+W opens it where the user is.
     WallpaperPicker {
         id: wallpaperPicker
     }
@@ -145,38 +33,49 @@ ShellRoot {
     IpcHandler {
         target: "wallpaper"
 
-        function toggleWallpaper() {
+        function toggleWallpaper(): void {
+            const screenFor = (Hyprland.focusedMonitor?.name) ?? "";
+            wallpaperPicker.screen = Quickshell.screens.find(s => s.name === screenFor)
+                ?? wallpaperPicker.screen;
             wallpaperPicker.toggle();
         }
     }
 
+    // Toggle the launcher on the focused monitor's ScreenShell instance.
     IpcHandler {
         target: "launcher"
 
-        function toggleLauncher() {
-            launcher.toggle();
+        function toggleLauncher(): void {
+            const screenName = (Hyprland.focusedMonitor?.name) ?? "";
+            const inst = screenVariants.instances.find(i => i.modelData?.name === screenName)
+                ?? screenVariants.instances[0];
+            if (inst)
+                inst.launcher.toggle();
         }
     }
 
+    // Toggle the calendar popup on the focused monitor's instance.
     IpcHandler {
         target: "calendar"
 
-        function toggleCalendar() {
-            calendarPopup.toggle();
+        function toggleCalendar(): void {
+            const screenName = (Hyprland.focusedMonitor?.name) ?? "";
+            const inst = screenVariants.instances.find(i => i.modelData?.name === screenName)
+                ?? screenVariants.instances[0];
+            if (inst)
+                inst.calendarPopup.toggle();
         }
     }
 
     // Called by the non-consuming Esc bind (see keybindings.lua). Popups and
-    // the About window take no keyboard focus, so Esc reaches the compositor
+    // the About windows take no keyboard focus, so Esc reaches the compositor
     // instead of them. No-op when nothing is open.
     IpcHandler {
         target: "popup"
 
-        function closeActive() {
-            if (PopupManager.current !== null)
-                PopupManager.current.close();
-            if (aboutWindow.isOpen)
-                aboutWindow.close();
+        function closeActive(): void {
+            for (const inst of screenVariants.instances)
+                inst.closePopups();
         }
     }
 }

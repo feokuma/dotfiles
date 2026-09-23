@@ -1,1 +1,2 @@
 singleton PowerProfileService 1.0 PowerProfileService.qml
+singleton NotificationService 1.0 NotificationService.qml
