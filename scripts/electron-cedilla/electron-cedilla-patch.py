@@ -18,11 +18,24 @@ binary (run with sudo).
 Usage:
   sudo python3 electron-cedilla-patch.py [/path/to/electron]
 
-Default path: /usr/lib/electron42/electron
+Without an argument, every installed system Electron binary is patched,
+resolved dynamically via /usr/lib/electron*/electron (the directory name
+changes on version upgrades, e.g. electron42 -> electron43).
 """
-import sys, os, shutil, datetime
+import sys, os, glob, shutil, datetime
 
-BIN = sys.argv[1] if len(sys.argv) > 1 else "/usr/lib/electron42/electron"
+
+def default_binaries():
+    binaries = sorted(
+        glob.glob("/usr/lib/electron*/electron"), reverse=True
+    )
+    if not binaries:
+        print("[error] no /usr/lib/electron*/electron found", file=sys.stderr)
+        sys.exit(2)
+    return binaries
+
+
+TARGETS = sys.argv[1:] if len(sys.argv) > 1 else default_binaries()
 
 # (description, old pattern, new pattern)
 PATCHES = [
@@ -30,12 +43,13 @@ PATCHES = [
     ("C -> Ç", b"\x43\x00\x06\x01", b"\x43\x00\xc7\x00"),
 ]
 
-def main():
-    if not os.path.isfile(BIN):
-        print(f"[error] binary not found: {BIN}", file=sys.stderr)
-        return 1
+def patch_one(bin_path):
+    if not os.path.isfile(bin_path):
+        print(f"[error] binary not found: {bin_path}", file=sys.stderr)
+        return 2
 
-    data = open(BIN, "rb").read()
+    data = open(bin_path, "rb").read()
+    BIN = bin_path
 
     counts = {desc: data.count(old) for desc, old, _ in PATCHES}
     total_old = sum(counts.values())
@@ -95,10 +109,24 @@ def main():
     os.chown(tmp, st.st_uid, st.st_gid)
     os.replace(tmp, BIN)
 
-    print("[ok] patch applied:")
+    print(f"[ok] patch applied to {BIN}:")
     print("\n".join(report))
-    print("Restart Electron apps (e.g. VS Code) completely and test ' + c.")
     return 0
+
+
+def main():
+    failed = False
+    for bin_path in TARGETS:
+        print(f"==> {bin_path}")
+        rc = patch_one(bin_path)
+        # rc 2 = already patched / nothing to do — informational, not failure
+        if rc in (0, 1, 2):
+            continue
+        failed = True
+    if not failed:
+        print("Restart Electron apps (e.g. VS Code) completely and test ' + c.")
+    return 1 if failed else 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

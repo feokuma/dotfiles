@@ -14,11 +14,14 @@ binário (`ui::CharacterComposer`), que mapeia `dead_acute + c → ć`. Bug aber
 
 O pacote `visual-studio-code-electron-bin` **não tem Chromium embutido** — ele
 roda sobre o Electron do sistema (shebang `#!/usr/bin/electron42`). Portanto o
-alvo do patch é o binário do pacote `electron42`:
+alvo do patch é o binário do pacote `electronNN`:
 
 ```text
-/usr/lib/electron42/electron
+/usr/lib/electronNN/electron
 ```
+
+A versão é resolvida dinamicamente por glob (`/usr/lib/electron*/electron`),
+então upgrades (electron42 → electron43...) continuam funcionando sem ajustes.
 
 Isso corrige o ç em todos os apps que usam esse Electron.
 
@@ -56,18 +59,16 @@ Depois feche o VS Code completamente (processo inteiro, não só a janela) e tes
 sudo ./scripts/electron-cedilla/install.sh
 ```
 
-O script instala o patch em `/usr/local/bin`, o hook em `/etc/pacman.d/hooks/`
-e aplica o patch. Usa `ELECTRON_VER=42` por padrão; se o pacote do sistema
-mudar de versão (electron43...), rode:
-
-```bash
-sudo ELECTRON_VER=43 ./scripts/electron-cedilla/install.sh
-```
+O script instala o patch em `/usr/local/bin`, o hook em `/etc/pacman.d/hooks/electron-cedilla.hook`
+e aplica o patch a todos os `/usr/lib/electron*/electron`. O hook usa o glob
+`Target = electron*`, que continua válido nas próximas atualizações versão (electron42 → electron43...).
+Nada precisa ser ajustado quando o Electron sobe de versão — o hook reaplica
+o patch automaticamente no post-transaction do pacman.
 
 ### Verificar
 
 ```bash
-python3 /usr/local/bin/electron-cedilla-patch.py /usr/lib/electron42/electron
+python3 /usr/local/bin/electron-cedilla-patch.py /usr/lib/electron43/electron
 # → "[ok] already patched (nothing to do)."
 ```
 
@@ -87,12 +88,12 @@ grava um `electron.bak-<data>` do binário atual antes de cada patch.
 Para reverter imediatamente (mesma versão, antes de qualquer upgrade):
 
 ```bash
-sudo cp -a /usr/lib/electron42/electron.orig /usr/lib/electron42/electron
+sudo cp -a /usr/lib/electronNN/electron.orig /usr/lib/electronNN/electron
 ```
 
 ## Arquivos
 
-- `electron-cedilla-patch.py` — script de patch (idempotente, com backups).
-- `electron-cedilla.hook` — hook do pacman para reaplicar após upgrades de `electron42`.
-- `install.sh` / `uninstall.sh` — instalador/desinstalador (versão parametrizável via `ELECTRON_VER`).
+- `electron-cedilla-patch.py` — script de patch (idempotente, com backups; detecta todas as versões instaladas via glob).
+- `electron-cedilla.hook` — hook do pacman (`Target = electron*`) para reaplicar após upgrades.
+- `install.sh` / `uninstall.sh` — instalador/desinstalador (resolvem as versões dinamicamente).
 - `LICENSE` — MIT, do projeto upstream [chromium-wayland-cedilla-fix](https://github.com/lcassa/chromium-wayland-cedilla-fix), do qual este script é derivado.

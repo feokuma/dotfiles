@@ -2,9 +2,10 @@
 Operation = Install
 Operation = Upgrade
 Type = Package
-Target = electron42
+Target = electron*
 
 [Action]
 Description = Reapplying ' + c -> ç compose patch to the Electron binary...
 When = PostTransaction
-Exec = /usr/bin/python3 /usr/local/bin/electron-cedilla-patch.py /usr/lib/electron42/electron
+# No argument: the script itself resolves every installed /usr/lib/electron*/electron
+Exec = /usr/bin/python3 /usr/local/bin/electron-cedilla-patch.py
