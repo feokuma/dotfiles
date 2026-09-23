@@ -46,12 +46,16 @@ local function setup_dap()
     if not project then
       return nil
     end
-    return vim.fn.glob(
-      vim.fs.dirname(project)
-        .. "/bin/Debug/**/"
-        .. vim.fn.fnamemodify(project, ":t:r")
-        .. ".dll"
-    )
+    -- Usa o diretório do projeto de forma absoluta (via `:p`) e absolutiza
+    -- o resultado do glob. O `dotnet build`/netcoredbg roda com cwd do
+    -- diretório do projeto, então o caminho absoluto evita depender de onde
+    -- o nvim foi aberto (ex.: raiz da solução).
+    local base = vim.fn.fnamemodify(project, ":p:h")
+    local dll = vim.fn.glob(base .. "/bin/Debug/**/" .. vim.fn.fnamemodify(project, ":t:r") .. ".dll")
+    if dll ~= "" then
+      return vim.fn.fnamemodify(dll, ":p")
+    end
+    return dll
   end
 
   local function has(name)
@@ -78,7 +82,14 @@ local function setup_dap()
         end
         return dll
       end,
-      cwd = "${workspaceFolder}",
+      -- Roda o debugger no diretório do projeto do buffer atual, não onde o
+      -- nvim foi aberto. `${workspaceFolder}` (= getcwd) aponta para a raiz
+      -- da solução ao abrir o nvim lá e o netcoredbg falhava ao resolver o
+      -- caminho da dll, terminando a sessão na hora (DAP UI abria e fechava).
+      cwd = function()
+        local project = projeto_atual()
+        return project and vim.fs.dirname(project) or vim.fn.getcwd()
+      end,
       stopAtEntry = false,
     })
   end
