@@ -5,8 +5,9 @@ import QtQuick
 import "../../theme"
 import "../../widgets"
 
-// Session/power popup: lock screen, reboot, power off. Opened by clicking
-// the Hyprland logo pill on the left of the bar.
+// Session/power popup: lock screen, reboot, power off, plus utility rows
+// (hyprmod settings, about). Opened by clicking the Hyprland logo pill on
+// the left of the bar.
 //
 // Container mirrors BluetoothPopup, but anchored to the bar's LEFT side
 // (under the logo). Safety model: Reboot/Power off require an inline
@@ -62,6 +63,14 @@ PopupBase {
     Process {
         id: poweroffProc
         command: ["setsid", "systemctl", "poweroff"]
+        running: false
+    }
+
+    // "Hyprland settings": launches the hyprmod GTK4 settings app detached
+    // via setsid (must outlive this shell across reload/restart).
+    Process {
+        id: hyprmodProc
+        command: ["setsid", "hyprmod"]
         running: false
     }
 
@@ -164,6 +173,24 @@ PopupBase {
             rightPadding: Theme.popupPadding
             spacing: 6
 
+            // System section header: pairs with the Session header below
+            // to split utilitary rows from session actions.
+            Item {
+                id: systemHeaderRow
+
+                width: contentColumn.width - contentColumn.leftPadding - contentColumn.rightPadding
+                height: Theme.popupRowHeight
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "System"
+                    font.pixelSize: Theme.fontSize
+                    font.family: Theme.fontFamily
+                    font.bold: Theme.fontBold
+                    color: Theme.textMuted
+                }
+            }
+
             // About row: opens ghostty + fastfetch, floating and centered
             // (Hyprland `fastfetch-about` window rule). Non-destructive: no
             // confirmation needed, closes the popup on click.
@@ -219,6 +246,69 @@ PopupBase {
                     onClicked: {
                         if (root.aboutWindow)
                             root.aboutWindow.open();
+                        root.close();
+                    }
+                }
+            }
+
+            // Hyprland settings row: opens hyprmod (GTK4 Hyprland settings
+            // app). Non-destructive: no confirmation needed, closes the
+            // popup on click. md-tune glyph matches the other rows (matches
+            // hyprmod's slider artwork). Codepoint verified against the
+            // installed font: md-tune U+F0493.
+            Item {
+                id: hyprmodRow
+
+                width: contentColumn.width - contentColumn.leftPadding - contentColumn.rightPadding
+                height: Theme.popupRowHeight
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: Theme.pillRadius
+                    color: Theme.highlight
+                    opacity: hyprmodArea.containsMouse ? 0.12 : 0.0
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Theme.animFast
+                        }
+                    }
+                }
+
+                Text {
+                    id: hyprmodIcon
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    leftPadding: 10
+                    width: 24
+                    text: "󰒓" // md-tune — mirrors hyprmod's slider artwork
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize + 4
+                    font.bold: Theme.fontBold
+                    color: Theme.text
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: hyprmodIcon.right
+                    anchors.leftMargin: 10
+                    text: "Hyprland settings"
+                    font.pixelSize: Theme.fontSize
+                    font.family: Theme.fontFamily
+                    font.bold: Theme.fontBold
+                    color: Theme.text
+                }
+
+                MouseArea {
+                    id: hyprmodArea
+
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        // setsid detaches so hyprmod survives shell reloads,
+                        // same rationale as the lock/reboot rows above.
+                        hyprmodProc.running = true;
                         root.close();
                     }
                 }
