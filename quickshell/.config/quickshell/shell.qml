@@ -9,6 +9,7 @@ import "components/about"
 import "components/bar"
 import "components/launcher"
 import "components/notifications"
+import "components/wallpaper"
 import "theme"
 import "utils"
 
@@ -136,6 +137,18 @@ ShellRoot {
     }
 
     Notifications {}
+
+    WallpaperPicker {
+        id: wallpaperPicker
+    }
+
+    IpcHandler {
+        target: "wallpaper"
+
+        function toggleWallpaper() {
+            wallpaperPicker.toggle();
+        }
+    }
 
     IpcHandler {
         target: "launcher"
