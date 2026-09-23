@@ -20,7 +20,7 @@ PanelWindow {
     property bool isOpen: false
 
     // Collection folder (absolute; FolderListModel does not expand tilde).
-    property string wallpaperDir: (Quickshell.env("HOME") ?? "") + "/Pictures"
+    property string wallpaperDir: (Quickshell.env("HOME") ?? "") + "/Pictures/Wallpapers"
 
     // hyprpaper owns the wallpaper; the conf rewrite happens after apply.
     property string hyprpaperConf: (Quickshell.env("HOME") ?? "") + "/.config/hypr/hyprpaper.conf"
