@@ -55,6 +55,13 @@ PanelWindow {
         sedProcess.running = true;
     }
 
+    function notify(path) {
+        // Ack via the shell's own notification daemon (Quickshell owns the
+        // DBus server): notify-send lands in the Cards top-right stack.
+        const name = path.split("/").pop();
+        Quickshell.execDetached({ command: ["notify-send", "-a", "Wallpaper", "Wallpaper applied", name] });
+    }
+
     function refreshCurrentPath() {
         // Tolerate cold open: an unloaded conf yields "" (no ring that
         // time); the `loaded` signal refreshes it as soon as it arrives.
@@ -109,6 +116,7 @@ PanelWindow {
                 });
             }
             root.persist(path);
+            root.notify(path);
             root.currentWallpaperPath = path;
             root.pendingPath = "";
             root.close();
