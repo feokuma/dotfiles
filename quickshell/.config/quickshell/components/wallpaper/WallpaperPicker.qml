@@ -253,6 +253,20 @@ PanelWindow {
                 height: parent.height - parent.topPadding - parent.bottomPadding - content.headerHeight - content.spacing
                 clip: false // scaled discs must be allowed to overflow slightly
 
+                // Background wheel/snap surface: two-finger touchpad swipes
+                // arrive here as scroll axis events, nudging the selection
+                // exactly like the compositor's 3-finger workspace swipe.
+                // The whole carousel area is the gesture zone; disc clicks
+                // still win because child MouseAreas sit above this one.
+                MouseArea {
+                    id: swipeSurface
+
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton // clicks must reach the discs
+                    hoverEnabled: false
+                    onWheel: (wheel) => carousel.feedSwipe(wheel.angleDelta.y)
+                }
+
                 // Selected (centered) disc; defaults to the current wallpaper
                 // so the picker opens on what's already applied.
                 property int selectedIndex: 0
@@ -283,6 +297,34 @@ PanelWindow {
                     if (path)
                         root.apply(path);
                 }
+
+                // Two-finger swipe accumulator. Up/natural-scroll-forward
+                // (positive delta) moves to the next wallpaper on the right,
+                // mirroring the compositor gesture direction. One step per
+                // wheel-notch: a flick may emit several events, so the
+                // leftover delta carries over between steps.
+                property real swipeAccum: 0
+
+                function feedSwipe(delta) {
+                    // A short pause between wheel bursts resets the ramp, so
+                    // two separate swipes never double-step.
+                    const now = Date.now();
+                    if (now - carousel.lastSwipeAt > 250)
+                        carousel.swipeAccum = 0;
+                    carousel.lastSwipeAt = now;
+
+                    carousel.swipeAccum += delta;
+                    while (carousel.swipeAccum >= 120) {
+                        carousel.selectNext();
+                        carousel.swipeAccum -= 120;
+                    }
+                    while (carousel.swipeAccum <= -120) {
+                        carousel.selectPrevious();
+                        carousel.swipeAccum += 120;
+                    }
+                }
+
+                property real lastSwipeAt: 0
 
                 // Local paths reported by the delegates as they resolve; the
                 // model supports no direct `get()`, so this suffices.
@@ -416,6 +458,9 @@ PanelWindow {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
+                                // Faded-out fan edge must not swallow hover
+                                // or clicks aimed at the swipe surface.
+                                enabled: Math.abs(disc.offset) <= carousel.visualRange
                                 onClicked: {
                                     if (disc.isSelected)
                                         root.apply(disc.localPath);
