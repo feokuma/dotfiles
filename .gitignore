@@ -3,3 +3,7 @@
 quickshell/.config/quickshell/.qmlls.ini
 **/.qmlls.ini
 __pycache__/
+# Per-machine wallpaper (sourced by hyprpaper.conf and rewritten by the
+# wallpaper picker) — must stay out of Git so a wallpaper change never
+# dirties the repo.
+hypr/.config/hypr/hyprpaper-local.conf
