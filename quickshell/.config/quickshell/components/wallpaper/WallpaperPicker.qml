@@ -24,8 +24,11 @@ PanelWindow {
     // Collection folder (absolute; FolderListModel does not expand tilde).
     property string wallpaperDir: (Quickshell.env("HOME") ?? "") + "/Pictures/Wallpapers"
 
-    // hyprpaper owns the wallpaper; the conf rewrite happens after apply.
-    property string hyprpaperConf: (Quickshell.env("HOME") ?? "") + "/.config/hypr/hyprpaper.conf"
+    // hyprpaper owns the wallpaper. The versioned hyprpaper.conf only
+    // `source`s this per-machine file; the picker rewrites it here (sed)
+    // so wallpaper changes never dirty the repo.
+    property string hyprpaperConf:
+        (Quickshell.env("HOME") ?? "") + "/.config/hypr/hyprpaper-local.conf"
 
     // Path currently configured in hyprpaper.conf, refreshed on open; used
     // to ring the active thumbnail ("current" marker).
