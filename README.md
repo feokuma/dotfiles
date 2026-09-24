@@ -258,6 +258,41 @@ reaplicar o estado manualmente:
 ~/.config/hypr/scripts/bluetooth-disable-touchpad.sh --apply
 ```
 
+## Scripts
+
+Vários helpers vivem no repo; nenhum entra no PATH global — exceto os
+installers do patch de cedilha, que se auto-instalam.
+
+### `hypr/.config/hypr/scripts/` (sessão Hyprland)
+
+| Script | Chama | O que faz |
+| --- | --- | --- |
+| `bluetooth-disable-touchpad.sh` | `autostart.lua` + unit systemd | Desabilita o touchpad com mouse BT conectado (seção [Touchpad + mouse Bluetooth](#touchpad--mouse-bluetooth)) |
+| `lid-switch.sh` | `keybindings.lua` (evento do lid switch) | Fechamento da tampa: com monitor externo, desliga só `eDP-1` e a sessão continua; sem monitor, lock (`hyprlock`) + suspend. Abertura reativa o painel interno |
+
+O `lid-switch.sh` não é chamado manualmente: os binds `switch:*:Lid Switch`
+do Hyprland disparam `~/.config/hypr/scripts/lid-switch.sh closed|open`.
+Manualmente (depuração):
+
+```bash
+~/.config/hypr/scripts/lid-switch.sh closed
+```
+
+### `scripts/` (raiz — patches de cedilha fora de `$HOME`)
+
+Fix do layout US-International no Wayland (`' + c → ç`), onde
+Chromium/Google apps ignoram o `.XCompose` do repo. Cada pasta tem o seu
+próprio `README.md` detalhado:
+
+| Diretório | Alvo | Uso |
+| --- | --- | --- |
+| `scripts/electron-cedilla/` | Apps Electron do sistema (`visual-studio-code-electron-bin`, etc.) | `sudo scripts/electron-cedilla/install.sh` — instala patch em `/usr/local/bin` + hook do pacman (sobrevive a upgrades, aplicando-se de novo automaticamente). Desfazer: `sudo scripts/electron-cedilla/uninstall.sh` |
+| `scripts/google-chrome-cedilla/` | Chrome (`/opt/google/chrome/chrome`) | **Não aplicar** nas versões atuais (Chrome ≥ ~153 já corrige `' + c` upstream). Guardado para o caso de regressão; mesmo fluxo de install/uninstall |
+
+Requisitos: `python3` (o patch procura padrões de bytes nos binários;
+idempotente e com backup automático). Alterações em `/usr/local/bin` e
+`/etc/pacman.d/hooks` — sempre manuais e com revisão antes de rodar.
+
 ## Atalhos principais (`SUPER` = tecla Windows)
 
 | Atalho | Ação |
