@@ -7,10 +7,12 @@ import QtQuick
 import "../../theme"
 
 // Wallpaper picker overlay: centered card with a grid of thumbnails from a
-// wallpapers folder. Clicking a thumbnail applies it on the spot through
-// hyprpaper's IPC (per compositor monitor) and rewrites the `path` line in
-// hyprpaper.conf, so the choice survives relogin. Opened by the "wallpaper"
-// IPC (SUPER + W, see keybindings.lua).
+// wallpapers folder. Moving the selection live-previews that wallpaper on
+// screen; clicking the centered thumbnail (or Enter) applies it on the spot
+// through hyprpaper's IPC (per compositor monitor) and rewrites the `path`
+// line in hyprpaper.conf, so the choice survives relogin. Closing without
+// applying (Esc/IPC toggle) rolls the screen back to the configured
+// wallpaper. Opened by the "wallpaper" IPC (SUPER + W, see keybindings.lua).
 //
 // Not a PopupBase subclass: unlike the bar popups it takes keyboard focus
 // (own Esc handling) and is centered like the Launcher, not bar-anchored.
@@ -32,15 +34,64 @@ PanelWindow {
     // Non-empty while an image is being applied (preload -> wallpaper chain).
     property string pendingPath: ""
 
+    // Live-preview state: the configured wallpaper captured at open() (the
+    // revert target), the path last sent to hyprpaper as `wallpaper`, and
+    // the latest browsed-to request. Keeping request and painted apart lets
+    // the chain absorb rapid arrow/swipe bursts and lets close() revert.
+    property string originalPath: ""
+    property string paintedPreviewPath: ""
+    property string pendingPreviewPath: ""
+
     readonly property var imageExtensions: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
 
     function apply(path) {
+        // Consume any preview still queued: the apply chain closes the
+        // popup, which would otherwise restore the pre-preview wallpaper
+        // over the freshly applied one.
+        root.pendingPreviewPath = "";
+        root.paintedPreviewPath = path;
+        root.originalPath = path;
         root.pendingPath = path;
         // hyprpaper's `wallpaper` refuses a path that was never preloaded in
         // this daemon run, so the preload must complete first (chained via
         // onExited on preloadProcess) — no shell layer needed.
         preloadProcess.command = ["hyprctl", "hyprpaper", "preload", path];
         preloadProcess.running = true;
+    }
+
+    function preview(path) {
+        // Live preview: same IPC chain as apply, but no conf rewrite, no
+        // notification and no close — the choice only becomes real on
+        // Enter/click. The request is queued and consumed by the chain, so
+        // bursts of arrow presses collapse into the latest request. An
+        // unset queue entry (delegates still resolving) is ignored.
+        if (!path || path === root.paintedPreviewPath)
+            return;
+        root.pendingPreviewPath = path;
+        if (!previewProcess.running) {
+            // hyprpaper refuses un-preloaded paths, same as apply().
+            previewProcess.command = ["hyprctl", "hyprpaper", "preload", path];
+            previewProcess.running = true;
+        }
+    }
+
+    function restore() {
+        // Close without applying: drop anything still queued, then put the
+        // wallpaper configured at open() back on every monitor. No preload
+        // — the original is already loaded in this daemon run, and when the
+        // conf was unreadable there is nothing reliable to return to.
+        root.pendingPreviewPath = "";
+        const changed = root.paintedPreviewPath !== root.originalPath;
+        root.paintedPreviewPath = "";
+        if (root.originalPath === "" || !changed)
+            return;
+        const monitors = Hyprland.monitors.values;
+        for (let i = 0; i < monitors.length; i++) {
+            Quickshell.execDetached({
+                command: ["hyprctl", "hyprpaper", "wallpaper",
+                          monitors[i].name + "," + root.originalPath],
+            });
+        }
     }
 
     function persist(path) {
@@ -72,11 +123,19 @@ PanelWindow {
 
     function open() {
         refreshCurrentPath();
+        // Snapshot of what closing should return to; apply() updates
+        // currentWallpaperPath but that must not move the revert target.
+        root.originalPath = root.currentWallpaperPath;
+        root.paintedPreviewPath = root.currentWallpaperPath;
+        root.pendingPreviewPath = "";
         root.isOpen = true;
         carousel.forceActiveFocus();
     }
 
     function close() {
+        // A close without a real apply (Esc, or the IPC toggle) leaves a
+        // preview on screen: roll back to the configured wallpaper.
+        root.restore();
         root.isOpen = false;
     }
 
@@ -120,6 +179,38 @@ PanelWindow {
             root.currentWallpaperPath = path;
             root.pendingPath = "";
             root.close();
+        }
+    }
+
+    // Preview twin of preloadProcess: paint the browsed-to wallpaper on
+    // every monitor without persisting it. `pendingPreviewPath` is re-read
+    // at each step; arrows/swipes arriving mid-chain simply update it, and
+    // a request that landed while the daemon was busy re-arms the preload
+    // so the last selection always wins.
+    Process {
+        id: previewProcess
+
+        onExited: {
+            const path = root.pendingPreviewPath;
+            if (path === "")
+                return; // closed/abandoned — restore() takes over
+
+            // Paint the latest requested path on every monitor; no eDP-1
+            // hard-coding, matching the apply flow.
+            root.paintedPreviewPath = path;
+            root.pendingPreviewPath = "";
+            const monitors = Hyprland.monitors.values;
+            for (let i = 0; i < monitors.length; i++) {
+                Quickshell.execDetached({
+                    command: ["hyprctl", "hyprpaper", "wallpaper", monitors[i].name + "," + path],
+                });
+            }
+
+            // A newer request queued while this one preloaded: chain again.
+            if (root.pendingPreviewPath !== "") {
+                previewProcess.command = ["hyprctl", "hyprpaper", "preload", root.pendingPreviewPath];
+                previewProcess.running = true;
+            }
         }
     }
 
@@ -223,7 +314,7 @@ PanelWindow {
                 Text {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "←/→ select · Enter/click apply · Esc close"
+                    text: "←/→ preview · Enter/click apply · Esc revert"
                     color: Theme.textMuted
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize - 2
@@ -273,6 +364,12 @@ PanelWindow {
                 // so the picker opens on what's already applied.
                 property int selectedIndex: 0
                 property bool initialized: false
+
+                // Every selection move (arrows, swipe, click-to-select)
+                // previews that wallpaper on screen; only apply() makes the
+                // choice permanent. On open the initial selection is the
+                // already-applied wallpaper, which preview() no-ops.
+                onSelectedIndexChanged: root.preview(paths[selectedIndex])
 
                 readonly property int count: folderModel.count
 
