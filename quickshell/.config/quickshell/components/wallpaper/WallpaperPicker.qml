@@ -9,10 +9,12 @@ import "../../theme"
 // Wallpaper picker overlay: centered card with a grid of thumbnails from a
 // wallpapers folder. Moving the selection live-previews that wallpaper on
 // screen; clicking the centered thumbnail (or Enter) applies it on the spot
-// through hyprpaper's IPC (per compositor monitor) and rewrites the `path`
-// line in hyprpaper.conf, so the choice survives relogin. Closing without
-// applying (Esc/IPC toggle) rolls the screen back to the configured
-// wallpaper. Opened by the "wallpaper" IPC (SUPER + W, see keybindings.lua).
+// through hyprpaper's IPC for THIS monitor only (the window is pointed at
+// the focused monitor by shell.qml) and rewrites the monitor's wallpaper
+// block in hyprpaper-local.conf, so the choice survives relogin. Closing
+// without applying (Esc/IPC toggle) rolls the screen back to the
+// configured wallpaper for this monitor. Opened by the "wallpaper" IPC
+// (SUPER + W, see keybindings.lua).
 //
 // Not a PopupBase subclass: unlike the bar popups it takes keyboard focus
 // (own Esc handling) and is centered like the Launcher, not bar-anchored.
@@ -20,6 +22,11 @@ PanelWindow {
     id: root
 
     property bool isOpen: false
+
+    // Monitor this window is on (shell.qml points it at the focused
+    // monitor). Empty on the unlikely open without a screen — the IPC
+    // chains then fall back to applying to every monitor.
+    readonly property string monitorName: root.screen?.name ?? ""
 
     // Collection folder (absolute; FolderListModel does not expand tilde).
     property string wallpaperDir: (Quickshell.env("HOME") ?? "") + "/Pictures/Wallpapers"
@@ -30,8 +37,9 @@ PanelWindow {
     property string hyprpaperConf:
         (Quickshell.env("HOME") ?? "") + "/.config/hypr/hyprpaper-local.conf"
 
-    // Path currently configured in hyprpaper.conf, refreshed on open; used
-    // to ring the active thumbnail ("current" marker).
+    // Path currently configured for THIS monitor (its own block, else the
+    // fallback block with an empty monitor), refreshed on open; used to
+    // ring the active thumbnail ("current" marker).
     property string currentWallpaperPath: ""
 
     // Non-empty while an image is being applied (preload -> wallpaper chain).
@@ -46,6 +54,15 @@ PanelWindow {
     property string pendingPreviewPath: ""
 
     readonly property var imageExtensions: ["*.png", "*.jpg", "*.jpeg", "*.webp"]
+
+    // hyprpaper `wallpaper` targets for this picker session: only the
+    // monitor hosting the window, or every monitor when the screen name
+    // is unknown (defensive; the normal path is single-monitor).
+    function wallpaperTargets() {
+        if (root.monitorName === "")
+            return Hyprland.monitors.values.map(m => m.name);
+        return [root.monitorName];
+    }
 
     function apply(path) {
         // Consume any preview still queued: the apply chain closes the
@@ -80,36 +97,72 @@ PanelWindow {
 
     function restore() {
         // Close without applying: drop anything still queued, then put the
-        // wallpaper configured at open() back on every monitor. No preload
-        // — the original is already loaded in this daemon run, and when the
-        // conf was unreadable there is nothing reliable to return to.
+        // wallpaper configured at open() back on the picker's monitor only
+        // (the preview only ever painted that one). No preload — the
+        // original is already loaded in this daemon run, and when the conf
+        // was unreadable there is nothing reliable to return to.
         root.pendingPreviewPath = "";
         const changed = root.paintedPreviewPath !== root.originalPath;
         root.paintedPreviewPath = "";
         if (root.originalPath === "" || !changed)
             return;
-        const monitors = Hyprland.monitors.values;
-        for (let i = 0; i < monitors.length; i++) {
+        const targets = root.wallpaperTargets();
+        for (let i = 0; i < targets.length; i++) {
             Quickshell.execDetached({
                 command: ["hyprctl", "hyprpaper", "wallpaper",
-                          monitors[i].name + "," + root.originalPath],
+                          targets[i] + "," + root.originalPath],
             });
         }
     }
 
+    // Escapes characters that are special in a POSIX ERE: monitor names
+    // (eDP-1, DP-1, HEADLESS-…) carry a dash, which is safe unquoted inside
+    // a bracket-less position but not worth relying on.
+    function escapeRegex(name) {
+        return name.replace(/[^a-zA-Z0-9_-]/g, "\\$&");
+    }
+
+    // Whether the local conf has a wallpaper block for the given monitor
+    // (empty name = the fallback block with an empty `monitor =`). This is
+    // a JavaScript RegExp — JS has no POSIX `[[:space:]]`; `\s`/`[ \t]`
+    // is the correct equivalent here.
+    function hasMonitorBlock(monitor) {
+        const re = new RegExp("^[ \\t]*monitor[ \\t]*=[ \\t]*"
+            + root.escapeRegex(monitor) + "[ \\t]*$", "m");
+        return re.test(hyprpaperConfView.text() ?? "");
+    }
+
     function persist(path) {
-        // Rewrite only the `path =` line inside the first wallpaper block.
-        // sed in-place instead of FileView's writeAdapter: this quickshell
-        // build ships no text adapter, only JsonAdapter.
-        // The key is indented inside the wallpaper{} block, so the anchor
-        // must tolerate leading spaces — `^path` matched nothing (silently)
-        // and a reboot used to fall back to the conf's default. The
-        // captured indent keeps the file layout untouched.
-        sedProcess.command = [
-            "sed", "-i", "-E",
-            "s|^([[:space:]]*)path[[:space:]]*=.*|\\1path    = " + path + "|",
-            root.hyprpaperConf,
-        ];
+        // Rewrite the `path =` line inside THIS monitor's wallpaper block,
+        // or append the block at EOF for a monitor without one (first apply
+        // on that monitor). The fallback block (empty `monitor =`) is only
+        // touched when the screen name is unknown. The `path =` anchor is
+        // scoped by range to the monitor line, so other monitor blocks are
+        // never rewritten, and the captured indent keeps the file layout.
+        const monitor = root.monitorName;
+        if (root.hasMonitorBlock(monitor)) {
+            sedProcess.command = [
+                "sed", "-i", "-E",
+                "/^[[:space:]]*monitor[[:space:]]*=[[:space:]]*"
+                    + root.escapeRegex(monitor) + "[[:space:]]*$/,"
+                    + "/^[[:space:]]*path[[:space:]]*=/"
+                    + "s|^([[:space:]]*)path[[:space:]]*=.*|\\1path    = " + path + "|",
+                root.hyprpaperConf,
+            ];
+        } else {
+            // GNU sed `a`: one -e per line; the backslash-space in each
+            // chunk preserves the block's indentation. Keys are still
+            // valid unindented if a sed version ever drops the escape.
+            sedProcess.command = [
+                "sed", "-i",
+                "-e", "$a wallpaper {",
+                "-e", "$a\\    monitor = " + monitor,
+                "-e", "$a\\    path    = " + path,
+                "-e", "$a\\    fit_mode = cover",
+                "-e", "$a}",
+                root.hyprpaperConf,
+            ];
+        }
         sedProcess.running = true;
     }
 
@@ -117,15 +170,28 @@ PanelWindow {
         // Ack via the shell's own notification daemon (Quickshell owns the
         // DBus server): notify-send lands in the Cards top-right stack.
         const name = path.split("/").pop();
-        Quickshell.execDetached({ command: ["notify-send", "-a", "Wallpaper", "Wallpaper applied", name] });
+        const where = root.monitorName === "" ? "" : " (" + root.monitorName + ")";
+        Quickshell.execDetached({ command: ["notify-send", "-a", "Wallpaper", "Wallpaper applied" + where, name] });
     }
 
     function refreshCurrentPath() {
-        // Tolerate cold open: an unloaded conf yields "" (no ring that
-        // time); the `loaded` signal refreshes it as soon as it arrives.
+        // Blocks are scanned, not first-match: this monitor's own
+        // `monitor = <name>` block wins, then the empty-monitor fallback.
+        // An unloaded conf yields "" (no ring that time); the `loaded`
+        // signal refreshes it as soon as it arrives.
         const text = hyprpaperConfView.text() ?? "";
-        const match = text.match(/path\s*=\s*([^\n]+)/);
-        root.currentWallpaperPath = match ? match[1].trim() : "";
+        const re = /monitor[ \t]*=[ \t]*([^\n]*)\n[\s\S]*?path[ \t]*=[ \t]*([^\n]+)/g;
+        let own = "";
+        let fallback = "";
+        let match;
+        while ((match = re.exec(text)) !== null) {
+            const blockMonitor = match[1].trim();
+            if (blockMonitor === root.monitorName)
+                own = match[2].trim();
+            else if (blockMonitor === "" && fallback === "")
+                fallback = match[2].trim();
+        }
+        root.currentWallpaperPath = own !== "" ? own : fallback;
     }
 
     function open() {
@@ -172,13 +238,14 @@ PanelWindow {
         id: preloadProcess
 
         onExited: {
-            // Apply to every monitor the compositor reports right now —
-            // no eDP-1 hard-coding.
+            // Apply to this monitor only (the window's screen), or every
+            // monitor the compositor reports when the screen name is
+            // unknown — no eDP-1 hard-coding.
             const path = root.pendingPath;
-            const monitors = Hyprland.monitors.values;
-            for (let i = 0; i < monitors.length; i++) {
+            const targets = root.wallpaperTargets();
+            for (let i = 0; i < targets.length; i++) {
                 Quickshell.execDetached({
-                    command: ["hyprctl", "hyprpaper", "wallpaper", monitors[i].name + "," + path],
+                    command: ["hyprctl", "hyprpaper", "wallpaper", targets[i] + "," + path],
                 });
             }
             root.persist(path);
@@ -189,11 +256,11 @@ PanelWindow {
         }
     }
 
-    // Preview twin of preloadProcess: paint the browsed-to wallpaper on
-    // every monitor without persisting it. `pendingPreviewPath` is re-read
-    // at each step; arrows/swipes arriving mid-chain simply update it, and
-    // a request that landed while the daemon was busy re-arms the preload
-    // so the last selection always wins.
+    // Preview twin of preloadProcess: paint the browsed-to wallpaper on the
+    // picker's monitor without persisting it. `pendingPreviewPath` is
+    // re-read at each step; arrows/swipes arriving mid-chain simply update
+    // it, and a request that landed while the daemon was busy re-arms the
+    // preload so the last selection always wins.
     Process {
         id: previewProcess
 
@@ -202,14 +269,15 @@ PanelWindow {
             if (path === "")
                 return; // closed/abandoned — restore() takes over
 
-            // Paint the latest requested path on every monitor; no eDP-1
-            // hard-coding, matching the apply flow.
+            // Paint the latest requested path on this monitor only (the
+            // window's screen); no eDP-1 hard-coding, matching the apply
+            // flow.
             root.paintedPreviewPath = path;
             root.pendingPreviewPath = "";
-            const monitors = Hyprland.monitors.values;
-            for (let i = 0; i < monitors.length; i++) {
+            const targets = root.wallpaperTargets();
+            for (let i = 0; i < targets.length; i++) {
                 Quickshell.execDetached({
-                    command: ["hyprctl", "hyprpaper", "wallpaper", monitors[i].name + "," + path],
+                    command: ["hyprctl", "hyprpaper", "wallpaper", targets[i] + "," + path],
                 });
             }
 
@@ -321,7 +389,7 @@ PanelWindow {
                 Text {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "←/→ preview · Enter/click apply · Esc revert"
+                    text: "←/→ preview · Enter/click apply on this monitor · Esc revert"
                     color: Theme.textMuted
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize - 2
