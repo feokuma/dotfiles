@@ -98,9 +98,13 @@ PanelWindow {
         // Rewrite only the `path =` line inside the first wallpaper block.
         // sed in-place instead of FileView's writeAdapter: this quickshell
         // build ships no text adapter, only JsonAdapter.
+        // The key is indented inside the wallpaper{} block, so the anchor
+        // must tolerate leading spaces — `^path` matched nothing (silently)
+        // and a reboot used to fall back to the conf's default. The
+        // captured indent keeps the file layout untouched.
         sedProcess.command = [
             "sed", "-i", "-E",
-            "s|^path[[:space:]]*=.*|path    = " + path + "|",
+            "s|^([[:space:]]*)path[[:space:]]*=.*|\\1path    = " + path + "|",
             root.hyprpaperConf,
         ];
         sedProcess.running = true;
