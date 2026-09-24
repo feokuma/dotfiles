@@ -191,6 +191,73 @@ instalação manual com aprovação):
 sudo pacman -S neovim ripgrep fd lua-language-server stylua qt6-declarative
 ```
 
+## Touchpad + mouse Bluetooth
+
+O touchpad do notebook é desabilitado automaticamente enquanto **qualquer
+mouse Bluetooth** estiver conectado e reabilitado quando não houver nenhum.
+Fones, teclados e outros dispositivos BT não interferem: a detecção usa o
+`Icon` do BlueZ (`input-mouse`), não nomes amigáveis.
+
+Peças envolvidas:
+
+```text
+hypr/.config/hypr/scripts/bluetooth-disable-touchpad.sh   # daemon do usuário
+hypr/.config/systemd/user/bluetooth-touchpad.service      # unit systemd --user
+hypr/.config/hypr/autostart.lua                           # inicia a unit + reaplica estado
+```
+
+Como funciona (orientado a eventos, sem polling):
+
+- `dbus-monitor` no bus de sistema escuta `org.bluez.Device1`
+  (`Disconnected`) e `org.freedesktop.DBus.Properties`
+  (`PropertiesChanged` do connect na interface do BlueZ);
+- a cada evento relevante, o script conta os dispositivos conectados com
+  `Icon: input-mouse` e aplica, por `hyprctl`:
+
+  ```bash
+  hyprctl eval "hl.device({name='<touchpad>', enabled=false})"   # ≥ 1 mouse BT
+  hyprctl eval "hl.device({name='<touchpad>', enabled=true})"    # nenhum
+  ```
+
+- é executado como `systemd --user service` (`Type=simple`,
+  `Restart=always`), iniciado pelo `autostart.lua` no hook
+  `hyprland.start`; logs vão para o journal do usuário:
+
+  ```bash
+  journalctl --user -u bluetooth-touchpad.service
+  ```
+
+Detalhes importantes desta implementação:
+
+- O toggle em runtime é feito com **`hl.device(...)` via `hyprctl eval`**
+  (Hyprland 0.55+ com config em Lua). `hyprctl keyword` é recusado com
+  parsers não-legacy e não existe option global `input.touchpad.enabled`.
+- O reload de config do Hyprland **reseta o estado per-device**, então o
+  `config.reloaded` do `autostart.lua` roda o script com `--apply`
+  (re-avaliação única) imediatamente após cada reload.
+- O nome do touchpad (`hyprctl devices`, nome sanitizado) está fixado em
+  `TOUCHPAD_NAME`, no topo do script (`asup1206:00-093a:300d-touchpad`
+  nesta máquina). Em outra máquina, ajuste essa constante.
+- Diferenças de timing: aplicação imediata na conexão BT — sem dependência
+  da enumeração tardia da libinput (por isso a abordagem udev foi
+  descartada).
+
+Para (re)instalar do zero:
+
+```bash
+stow hypr                       # cria o symlink da unit em ~/.config/systemd/user
+systemctl --user daemon-reload
+systemctl --user start bluetooth-touchpad.service
+```
+
+O serviço passa a ser iniciado e reavaliado pelo Hyprland em cada
+sessão; o `daemon-reload` só é necessário uma vez por clone/stow. Se quiser
+reaplicar o estado manualmente:
+
+```bash
+~/.config/hypr/scripts/bluetooth-disable-touchpad.sh --apply
+```
+
 ## Atalhos principais (`SUPER` = tecla Windows)
 
 | Atalho | Ação |
