@@ -1,17 +1,15 @@
 #!/bin/sh
-# Desabilita o touchpad do notebook enquanto QUALQUER mouse Bluetooth
-# (Icon: input-mouse, via BlueZ) estiver conectado; reabilita quando não
-# houver nenhum. Não depende de nomes amigáveis nem afeta outros
-# dispositivos BT (fones, teclados).
+# Desabilita o touchpad do notebook enquanto qualquer mouse Bluetooth
+# estiver conectado; reabilita quando não houver nenhum. A detecção do tipo
+# de dispositivo usa o Icon do BlueZ (input-mouse), sem depender de nomes
+# amigáveis — fones, teclados etc. não afetam o comportamento.
 #
-# Event-driven: o `bluetoothctl --monitor` não reporta device connects
-# (apenas ruído de controller/LE advertising), então o canal de eventos é o
-# dbus-monitor no bus de sistema, filtrando os sinais
-# org.bluez.Device1 Connected/Disconnected — emissores imediatos do BlueZ.
+# Event-driven via dbus-monitor no bus de sistema, reagindo aos sinais do
+# BlueZ (o bluetoothctl --monitor não reporta connect/disconnect de devices).
 #
 # Roda como unit systemd --user (bluetooth-touchpad.service), iniciada pelo
-# autostart.lua em hyprland.start (Hyprland precisa estar rodando para o
-# hyprctl funcionar). Logs via journal:
+# autostart.lua em hyprland.start — Hyprland precisa estar ativo para o
+# hyprctl funcionar. Logs via:
 #   journalctl --user -u bluetooth-touchpad.service
 #
 # `--apply`: re-avaliação única (usado em config.reloaded, pois o reload de
@@ -36,14 +34,14 @@ touchpad_apply() {
     if ! out="$(XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" \
         HYPRLAND_INSTANCE_SIGNATURE="$sig" hyprctl eval \
         "hl.device({name='$TOUCHPAD_NAME', enabled=$enable})" 2>&1)"; then
-      printf 'touchpad-toggle: hyprctl eval falhou (inst=%s): %s\n' "$sig" "$out"
+      printf 'bluetooth-disable-touchpad: hyprctl eval falhou (inst=%s): %s\n' "$sig" "$out"
     else
       printf 'touchpad enabled=%s aplicado (%s)\n' "$enable" "$out"
     fi
   done
 }
 
-# Mhouses BT conectados: lista MACs cujo Icon do BlueZ é input-mouse.
+# Mouses BT conectados: MACs cujo Icon do BlueZ é input-mouse.
 count_mice() {
   mice=""
   for mac in $(bluetoothctl devices Connected 2>/dev/null | awk '{print $2}'); do
