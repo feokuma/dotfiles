@@ -1,0 +1,9 @@
+[Unit]
+Description=Disable laptop touchpad while a Bluetooth mouse is connected
+# Iniciado pelo autostart.lua (hyprland.start). Reage a eventos BlueZ.
+
+[Service]
+Type=simple
+ExecStart=/home/feokuma/.config/hypr/scripts/bluetooth-disable-touchpad.sh
+Restart=always
+RestartSec=3
