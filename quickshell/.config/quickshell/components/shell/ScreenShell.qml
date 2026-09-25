@@ -1,4 +1,5 @@
 import Quickshell
+import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts
 import "../about"
@@ -31,6 +32,7 @@ Scope {
     // Routed by shell.qml IPC helpers (focused-screen toggle/close).
     readonly property alias launcher: launcher
     readonly property alias calendarPopup: calendarPopup
+    readonly property alias colorsPopup: colorsPopup
 
     // Close an open popup/util window on this screen (from the global Esc
     // IPC in shell.qml). Only one popup is open session-wide at a time, so
@@ -171,6 +173,26 @@ Scope {
         id: powerMenuPopup
         screen: shell.modelData
         aboutWindow: aboutWindow
+    }
+
+    // Recent picked colors + Pick Color action. Dot-comma feedback side:
+    // after a successful pick (any entry point: keybind, popup button,
+    // future launcher action) the popup reopens here with the new color
+    // highlighted — visual feedback without extra notification plumbing.
+    ColorsPopup {
+        id: colorsPopup
+        screen: shell.modelData
+    }
+
+    Connections {
+        target: ColorService
+
+        function onColorPicked(hex) {
+            // Only the focused screen's popup opens; the others stay idle.
+            if (shell.modelData.name !== (Hyprland.focusedMonitor?.name ?? ""))
+                return;
+            colorsPopup.openFor(hex);
+        }
     }
 
     NotificationsOverlay {

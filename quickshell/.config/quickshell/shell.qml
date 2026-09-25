@@ -7,6 +7,7 @@ import Quickshell.Io
 import QtQuick
 import "components/shell"
 import "components/wallpaper"
+import "services"
 
 // Global shell orchestrator.
 //
@@ -64,6 +65,28 @@ ShellRoot {
                 ?? screenVariants.instances[0];
             if (inst)
                 inst.calendarPopup.toggle();
+        }
+    }
+
+    // Color picker flow: close any open popup first (hyprpicker needs the
+    // screen/pointer), then let ColorService run hyprpicker. On stdout the
+    // service reopens the popup on the focused screen (colorPicked →
+    // ScreenShell below) as visual feedback.
+    IpcHandler {
+        target: "colors"
+
+        function pick(): void {
+            for (const inst of screenVariants.instances)
+                inst.closePopups();
+            ColorService.pick();
+        }
+
+        function toggleColors(): void {
+            const screenName = (Hyprland.focusedMonitor?.name) ?? "";
+            const inst = screenVariants.instances.find(i => i.modelData?.name === screenName)
+                ?? screenVariants.instances[0];
+            if (inst)
+                inst.colorsPopup.toggle();
         }
     }
 
