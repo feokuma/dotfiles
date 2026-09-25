@@ -1,0 +1,9 @@
+# Keymap additions on top of Yazi's defaults. Only the two clipboard
+# shortcuts are customized; everything else keeps the built-in binding.
+
+[mgr]
+prepend_keymap = [
+	# Wayland clipboard integration (plugins using wl-clipboard).
+	{ on = "<C-i>", run = "plugin clip-image -- --image", desc = "Copy image content to clipboard" },
+	{ on = "<C-y>", run = "plugin clip-copy -- --files",  desc = "Copy files to clipboard as URIs" },
+]
