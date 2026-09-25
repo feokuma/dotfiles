@@ -137,6 +137,11 @@ Pré-requisitos:
   `power-saver`) usados pelo componente de bateria da barra Quickshell: a
   barra lê/troca o perfil via `busctl` (D-Bus do daemon), sem CLI adicional.
   Ativar com: `sudo systemctl enable --now power-profiles-daemon`
+- **`hyprpicker`** (repo oficial: `yay -S hyprpicker`) — captura de cor na
+  tela, usado pelo Color Picker da Quickshell (seção
+  [Color Picker](#color-picker))
+- **`wl-clipboard`** (`wl-copy`/`wl-paste`) — clipboard Wayland; usado pelo
+  Color Picker e pelos atalhos de screenshot
 - **`gnome-themes-extra`** — fornece o tema `Adwaita-dark` usado pelo
   GTK3 (incl. `xdg-desktop-portal-gtk`, responsável pelos diálogos de
   arquivo do Chrome/Chrome-based apps). Sem este pacote, o GTK não
@@ -243,6 +248,73 @@ instalação manual com aprovação):
 
 ```bash
 sudo pacman -S neovim ripgrep fd lua-language-server stylua qt6-declarative
+```
+
+## Color Picker
+
+Captura de cor na tela integrada à barra Quickshell, com `hyprpicker` como
+backend. O Quickshell é apenas orquestrador e interface — toda a captura
+de pixel é do `hyprpicker` (ecossistema Hyprland), e o clipboard é do
+`wl-copy` (Wayland nativo, já usado pelos atalhos de screenshot).
+
+### Como funciona
+
+```text
+SUPER+SHIFT+C (fallbacks futuros: launcher/IPC)
+    │  hl.bind → qs ipc call colors pick
+    ▼
+shell.qml (IpcHandler "colors")
+    │  1. fecha popups abertos (hyprpicker precisa do input)
+    ▼
+ColorService (singleton, services/ColorService.qml)
+    │  2. roda: sh -c "hyprpicker -b; echo"
+    │  3. cor chega no stdout (SplitParser, filtrada por regex #hex)
+    │  4. push no histórico (topo, max 5, dedup)
+    │  5. wl-copy <hex>
+    └→ signal colorPicked(hex) → ScreenShell reabre o popup na
+        tela focada com a cor nova destacada (feedback visual)
+```
+
+Decisões de arquitetura:
+
+- A ação **não mora na UI**: `ColorService` é um singleton sem janelas,
+  acionável por atalho (`SUPER+SHIFT+C`), por `qs ipc call colors pick`,
+  ou por uma futura ação do launcher/botão na barra — sem reescrita.
+- O popup (`components/bar/ColorsPopup.qml`) herda `PopupBase`
+  (contrato abertura/fechamento + registro no `PopupManager`, igual aos
+  demais popups da barra). Título "Color Picker"; cada linha mostra
+  swatch + HEX (RGB no hover), **clique em qualquer ponto da linha
+  copia** para o clipboard. O rótulo "Copy"/"Copied" à direita é só
+  affordance — é um `Text` não-interativo de propósito: um `Button`
+  roubaria o hover da linha (flicker, o "Copy" sumia ao alcançá-lo).
+- **Histórico é em sessão** (memória do Quickshell, máx. 5 cores,
+  descartado em reload/restart). Persistência futura planejada via
+  `FileView` (mesmo padrão do `WallpaperPicker`), se for desejada.
+
+### Peculiaridades do hyprpicker 0.4.7 (verificadas empiricamente)
+
+- **NÃO passar `-q`/`--quiet`**: com quiet ligado, a cor **não é impressa
+  no stdout** e o Quickshell fica sem dados. Sem `-q`, logs de debug podem
+  vazar pelo stdout, mas o filtro regex no `SplitParser` descarta tudo que
+  não é um token `#hex`.
+- A cor sai **sem newline**: o `SplitParser` do Quickshell 0.3.1 só emite
+  no marcador (não flameja o buffer no EOF), por isso o comando é
+  `sh -c "hyprpicker -b; echo"` — o `echo` fornece o `\n` terminador.
+- **Sem `--autocopy`**: por design, o Quickshell dono da cópia (evita
+  duplicar o comportamento e permite decidir destino no futuro).
+
+### Uso
+
+```bash
+# Atalho
+SUPER + SHIFT + C   # congela a tela; clique num pixel
+
+# IPC direto (debug / integração futura com launcher)
+qs ipc call colors pick          # fecha popups e inicia a captura
+qs ipc call colors toggleColors  # abre/fecha o popup do histórico
+
+# clipboard
+wl-paste
 ```
 
 ## Touchpad + mouse Bluetooth
@@ -356,6 +428,7 @@ idempotente e com backup automático). Alterações em `/usr/local/bin` e
 | `SUPER + E` | Gerenciador de arquivos |
 | `SUPER + R` | Launcher |
 | `SUPER + W` | Seletor de wallpapers (preview ao vivo; aplica no monitor em foco) |
+| `SUPER + SHIFT + C` | Color Picker (captura a cor da tela; histórico + copia HEX) |
 | `SUPER + C` | Fechar janela |
 | `SUPER + V` | Alternar flutuante |
 | `SUPER + 1..0` | Ir para o workspace |
