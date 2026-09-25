@@ -23,6 +23,11 @@ hl.bind("ALT + Space", hl.dsp.exec_raw("qs ipc call launcher toggleLauncher"))
 -- Wallpaper picker with preview thumbnails (Quickshell popup).
 hl.bind(mainMod .. " + W", hl.dsp.exec_raw("qs ipc call wallpaper toggleWallpaper"))
 
+-- Color picker (hyprpicker driven by Quickshell IPC; Service fecha popups,
+-- captura via stdin do hyprpicker e reabre o popup resultado na tela focada).
+-- SUPER+SHIFT+C está livre (checado contra todos os binds existentes).
+hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_raw("qs ipc call colors pick"))
+
 hl.bind("ALT + F4", hl.dsp.window.close())
 -- Float to fullscreen: SUPER+F toggles floating, F11 toggles fullscreen.
 -- SUPER+V is kept as a float alias.
