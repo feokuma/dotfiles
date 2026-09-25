@@ -19,8 +19,8 @@ local function rasterize(job, cache)
 	if err then
 		return err
 	end
-	if output and not output.success then
-		return Err("rsvg-convert exited with code " .. tostring(output.code))
+	if output and not output.status.success then
+		return Err("rsvg-convert exited with code " .. tostring(output.status.code))
 	end
 end
 
