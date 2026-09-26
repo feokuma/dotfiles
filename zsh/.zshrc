@@ -1,3 +1,6 @@
+# Completions dos SDKs (dotnet, npm, ...)
+# Ferramentas que não instalam as completions via pacman geram scripts aqui.
+fpath=(~/.config/zsh/completions $fpath)
 autoload -Uz compinit
 compinit
 
