@@ -3,6 +3,13 @@
 
 local map = vim.keymap.set
 
+require("config.leaf").setup()
+
+-- Leaf: toggle do preview Markdown com Leaf.
+map("n", "<leader>mp", function()
+  require("config.leaf").toggle()
+end, { desc = "Toggle Markdown preview with Leaf" })
+
 -- Quickshell: roda o shell atual num terminal (equivale a `qs -p <dir>`).
 -- Usa o diretório do arquivo atual como config path, então funciona tanto
 -- para `~/.config/quickshell/shell.qml` quanto para configs por path.
