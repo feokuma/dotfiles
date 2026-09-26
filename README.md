@@ -126,6 +126,8 @@ Pré-requisitos:
 - Quickshell (`quickshell` via AUR/yay) + Qt6 (`qt6-declarative` traz
   `qmlls`, `qmlformat`, `qmllint` em `/usr/lib/qt6/bin/`)
 - Neovim (`neovim`, `ripgrep`; opcional `fd`)
+- **`leaf`** — preview de Markdown dentro do Neovim (`<leader>mp`, seção
+  [Preview de Markdown com Leaf](#preview-de-markdown-com-leaf))
 - Lua: `lua-language-server`, `stylua` (via Mason no Neovim ou via pacman)
 - Ghostty
 - Zsh, Starship
@@ -247,8 +249,27 @@ Pacotes do Arch usados pelo editor (todos em repositório oficial,
 instalação manual com aprovação):
 
 ```bash
-sudo pacman -S neovim ripgrep fd lua-language-server stylua qt6-declarative
+sudo pacman -S neovim ripgrep fd lua-language-server stylua qt6-declarative leaf
 ```
+
+### Preview de Markdown com Leaf
+
+O Neovim tem integração nativa ao **[Leaf](https://github.com/RivoLink/leaf)**,
+visualizador de Markdown instalado no sistema — sem plugin de preview externo.
+A integração vive inteira em `lua/config/leaf.lua`.
+
+- `<leader>mp` (ou `:LeafToggle`) num buffer `.md` **salvo** abre um split
+  vertical à direita rodando `leaf -w <arquivo>` num terminal do próprio
+  Neovim; o preview atualiza conforme o arquivo é salvo e o foco volta
+  para o Markdown.
+- Executar de novo **fecha** o preview; de novo reabre. Não há risco de
+  vários previews duplicados para o mesmo arquivo.
+- Com o foco no terminal do Leaf, `q` fecha apenas o preview.
+- O ciclo de vida é completo: fechar o split manualmente, sair do Leaf ou
+  deletar o buffer Markdown encerra o processo `leaf` (sem órfãos) e limpa
+  o estado; outros terminais do Neovim não são afetados.
+- Verificações/falhas são reportadas via `vim.notify` (não Markdown,
+  arquivo sem salvar/caminho inválido, `leaf` ausente do `$PATH`).
 
 ## Color Picker
 
