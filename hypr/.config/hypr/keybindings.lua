@@ -28,6 +28,10 @@ hl.bind(mainMod .. " + W", hl.dsp.exec_raw("qs ipc call wallpaper toggleWallpape
 -- SUPER+SHIFT+C está livre (checado contra todos os binds existentes).
 hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_raw("qs ipc call colors pick"))
 
+-- Keybindings cheatsheet toggle (Quickshell IPC).
+-- SUPER+H is free (checked against all existing binds).
+hl.bind(mainMod .. " + H", hl.dsp.exec_raw("qs ipc call cheatsheet toggleCheatsheet"))
+
 hl.bind("ALT + F4", hl.dsp.window.close())
 -- Float to fullscreen: SUPER+F toggles floating, F11 toggles fullscreen.
 -- SUPER+V is kept as a float alias.
