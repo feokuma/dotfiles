@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../about"
 import "../bar"
+import "../cheatsheet"
 import "../launcher"
 import "../notifications"
 import "../../services"
@@ -33,6 +34,7 @@ Scope {
     readonly property alias launcher: launcher
     readonly property alias calendarPopup: calendarPopup
     readonly property alias colorsPopup: colorsPopup
+    readonly property alias cheatsheetWindow: cheatsheetWindow
 
     // Close an open popup/util window on this screen (from the global Esc
     // IPC in shell.qml). Only one popup is open session-wide at a time, so
@@ -42,6 +44,8 @@ Scope {
             PopupManager.current.close();
         if (aboutWindow.isOpen)
             aboutWindow.close();
+        if (cheatsheetWindow.isOpen)
+            cheatsheetWindow.close();
     }
 
     PanelWindow {
@@ -169,10 +173,18 @@ Scope {
         screen: shell.modelData
     }
 
+    // Floating, centered keybindings cheatsheet, same behavior as the
+    // About window; opened from the power menu or IPC.
+    CheatsheetWindow {
+        id: cheatsheetWindow
+        screen: shell.modelData
+    }
+
     PowerMenuPopup {
         id: powerMenuPopup
         screen: shell.modelData
         aboutWindow: aboutWindow
+        cheatsheetWindow: cheatsheetWindow
     }
 
     // Recent picked colors + Pick Color action. Dot-comma feedback side:

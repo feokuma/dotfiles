@@ -38,6 +38,9 @@ QtObject {
     readonly property color accentSecondary: palette.mauve
     readonly property color success: palette.green
     readonly property color warning: palette.red
+    readonly property color surface0: palette.surface0
+    readonly property color surface1: palette.surface1
+    readonly property color surface2: palette.surface2
     readonly property color textMuted: palette.overlay1
     readonly property color peach: palette.peach
     readonly property color yellow: palette.yellow
@@ -61,6 +64,17 @@ QtObject {
     readonly property int aboutInfoWidth: 460
     readonly property int aboutPadding: 26
     readonly property int aboutRowSpacing: 8
+
+    // Keybindings cheatsheet window (opened from the power menu). Fixed
+    // width card capped in height (content scrolls); descColumn is the
+    // left column reserved for the keycap combos so every description
+    // starts at the same x (widest combo: "SUPER + SHIFT + 1–9 + 0").
+    readonly property int cheatsheetWidth: 620
+    readonly property int cheatsheetMaxHeight: 640
+    readonly property int cheatsheetPadding: 26
+    readonly property int cheatsheetSectionSpacing: 18
+    readonly property int cheatsheetRowSpacing: 10
+    readonly property int cheatsheetDescColumn: 240
 
     // Animation durations
     readonly property int animFast: 150

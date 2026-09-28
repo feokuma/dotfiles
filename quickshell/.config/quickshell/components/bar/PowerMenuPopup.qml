@@ -24,6 +24,8 @@ PopupBase {
     property string armedAction: ""
     // Native about window attached by shell.qml (AboutWindow.qml).
     property var aboutWindow: null
+    // Native cheatsheet window attached by shell/ScreenShell (CheatsheetWindow.qml).
+    property var cheatsheetWindow: null
 
     readonly property var actions: [
         {
@@ -246,6 +248,66 @@ PopupBase {
                     onClicked: {
                         if (root.aboutWindow)
                             root.aboutWindow.open();
+                        root.close();
+                    }
+                }
+            }
+
+            // Keybindings row: opens the native cheatsheet window
+            // (CheatsheetWindow.qml), same contract as the About row.
+            // Non-destructive: no confirmation needed, closes the popup.
+            Item {
+                id: cheatsheetRow
+
+                width: contentColumn.width - contentColumn.leftPadding - contentColumn.rightPadding
+                height: Theme.popupRowHeight
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: Theme.pillRadius
+                    color: Theme.highlight
+                    opacity: cheatsheetArea.containsMouse ? 0.12 : 0.0
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Theme.animFast
+                        }
+                    }
+                }
+
+                Text {
+                    id: cheatsheetIcon
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    leftPadding: 10
+                    width: 24
+                    text: "󰌌" // md-keyboard U+F030C
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize + 4
+                    font.bold: Theme.fontBold
+                    color: Theme.text
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: cheatsheetIcon.right
+                    anchors.leftMargin: 10
+                    text: "Keybindings"
+                    font.pixelSize: Theme.fontSize
+                    font.family: Theme.fontFamily
+                    font.bold: Theme.fontBold
+                    color: Theme.text
+                }
+
+                MouseArea {
+                    id: cheatsheetArea
+
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (root.cheatsheetWindow)
+                            root.cheatsheetWindow.open();
                         root.close();
                     }
                 }

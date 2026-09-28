@@ -90,6 +90,19 @@ ShellRoot {
         }
     }
 
+    // Toggle the keybindings cheatsheet on the focused monitor's instance.
+    IpcHandler {
+        target: "cheatsheet"
+
+        function toggleCheatsheet(): void {
+            const screenName = (Hyprland.focusedMonitor?.name) ?? "";
+            const inst = screenVariants.instances.find(i => i.modelData?.name === screenName)
+                ?? screenVariants.instances[0];
+            if (inst)
+                inst.cheatsheetWindow.toggle();
+        }
+    }
+
     // Called by the non-consuming Esc bind (see keybindings.lua). Popups and
     // the About windows take no keyboard focus, so Esc reaches the compositor
     // instead of them. No-op when nothing is open.
