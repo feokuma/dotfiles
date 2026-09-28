@@ -88,12 +88,12 @@ hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 -- Laptop multimedia keys for volume and LCD brightness
 hl.bind(
 	"XF86AudioRaiseVolume",
-	hl.dsp.exec_raw("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
+	hl.dsp.exec_raw("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 1%+"),
 	{ locked = true, repeating = true }
 )
 hl.bind(
 	"XF86AudioLowerVolume",
-	hl.dsp.exec_raw("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
+	hl.dsp.exec_raw("wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-"),
 	{ locked = true, repeating = true }
 )
 hl.bind(
@@ -106,8 +106,8 @@ hl.bind(
 	hl.dsp.exec_raw("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),
 	{ locked = true, repeating = true }
 )
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_raw("brightnessctl -e4 -n2 set 5%+"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_raw("brightnessctl -e4 -n2 set 5%-"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_raw("brightnessctl -e4 -n2 set 1%+"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_raw("brightnessctl -e4 -n2 set 1%-"), { locked = true, repeating = true })
 
 -- Screenshots
 -- All screenshot binds use exec_cmd because they require shell features:
@@ -135,15 +135,8 @@ hl.bind("CTRL + SHIFT + Print", hl.dsp.exec_cmd("slurp | grim -g - - | wl-copy")
 -- Closed without external monitor: lock + suspend (lidclose.sh "closed"
 -- falls back to the idle pipeline path). Lid open re-enables the
 -- internal panel (no-op when already on / after dock-undock).
-hl.bind(
-	"switch:on:Lid Switch",
-	hl.dsp.exec_cmd("~/.config/hypr/scripts/lid-switch.sh closed"),
-	{ locked = true }
-)
-hl.bind(
-	"switch:off:Lid Switch",
-	hl.dsp.exec_cmd("~/.config/hypr/scripts/lid-switch.sh open")
-)
+hl.bind("switch:on:Lid Switch", hl.dsp.exec_cmd("~/.config/hypr/scripts/lid-switch.sh closed"), { locked = true })
+hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("~/.config/hypr/scripts/lid-switch.sh open"))
 
 -- Session / power
 hl.bind(mainMod .. " + M", hl.dsp.exit())
