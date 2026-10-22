@@ -458,6 +458,7 @@ PopupBase {
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
+            anchors.rightMargin: 10
             text: {
                 if (!row.device)
                     return "";
